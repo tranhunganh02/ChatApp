@@ -1,5 +1,5 @@
 // messages.tsx
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, FlatList, Image, StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import { Link } from 'expo-router';
 import { CircleComponent, ContainerComponent, IconButtonComponent, RowComponent, SectionComponent, SpaceComponent, TextComponent, UserList } from '@/components';
@@ -55,15 +55,14 @@ const Messages = () => {
   ];
 
   return (
-    <ContainerComponent>
+    <ContainerComponent styleContainer={{padding:0}}>
       <SectionComponent styles={{
-        padding: 0, height: heightScreen * 0.3, width: appInfo.sizes.WIDTH
+        height: heightScreen * 0.3,
+        paddingHorizontal:0
       }}>
         <LinearGradient
-          colors={["#04081d", "#343573"]}
-          start={[0, 0]}
-          end={[1, 1]}
-          style={{ flex: 1 }}
+          colors={["#080d2b", "#343573"]}
+          style={{flex:1}}
         >
           <SectionComponent styles={{ paddingTop: 12 }}>
             <RowComponent justify='space-between'>

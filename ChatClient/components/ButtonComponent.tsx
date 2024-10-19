@@ -7,7 +7,7 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import React, { ReactNode } from 'react';
-import { TextComponent } from '.';
+import  TextComponent  from './TextComponent'; // Trực tiếp từ nơi định nghĩa
 import { globalStyles } from '../styles/globalStyles';
 import { fontFamilies } from '../constants/fontFamilies';
 import { appColors } from '../constants/appColor';
@@ -26,7 +26,7 @@ interface Props {
     disabled?: boolean;
 }
 
-const ButtonComponent = (props: Props) => {
+const ButtonComponent = React.forwardRef((props: Props, ref) => {
     const {
         icon,
         text,
@@ -42,7 +42,7 @@ const ButtonComponent = (props: Props) => {
     } = props;
 
     return type === 'primary' ? (
-            <TouchableOpacity
+        <TouchableOpacity
             onPress={onPress}
             disabled={disabled}
             style={[
@@ -51,7 +51,7 @@ const ButtonComponent = (props: Props) => {
                 {
                     backgroundColor: color ? color : disabled ? appColors.gray3 : appColors.primary,
                     marginBottom: 12,
-                    width:'85%'
+                    width: '85%',
                 },
                 styles,
             ]}>
@@ -64,7 +64,7 @@ const ButtonComponent = (props: Props) => {
                     {
                         marginLeft: icon ? 12 : 0,
                         fontSize: 16,
-                        textAlign:'center'
+                        textAlign: 'center',
                     },
                 ]}
                 flex={icon && iconFlex === 'right' ? 1 : 0}
@@ -80,6 +80,6 @@ const ButtonComponent = (props: Props) => {
             />
         </TouchableOpacity>
     );
-};
+});
 
 export default ButtonComponent;
