@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../EventHub"
+		},
+		{
+			"path": ".."
+		}
+	],
+	"settings": {}
+}

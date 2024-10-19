@@ -1,37 +1,42 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+// app/_layout.tsx
+import { useRouter, Stack } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { View, ActivityIndicator, Button } from 'react-native';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLogin, setIsLogin] = useState(false);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
-  );
+  // Dù có điều hướng hay không, Stack phải được render
+  return <Stack
+  screenOptions={{
+      // headerStyle: {
+      //     backgroundColor: 'black'
+      // },
+      // headerTintColor: 'white''
+      headerBackTitleVisible: true,
+  }}
+ >
+      <Stack.Screen name="index" options={{
+            title: 'onboarding',
+            headerBackTitleVisible:true,
+            headerShown: false , 
+      }} />
+      <Stack.Screen name="auth/login" options={{
+        headerBackTitleVisible: false
+      }} />
+       <Stack.Screen name="auth/signup" options={{
+        headerBackTitleVisible: false
+      }} />
+       <Stack.Screen name="(tabs)" options={{
+        headerShown: false
+      }} />
+       <Stack.Screen name="[missing]" options={{
+            title: '404'
+        }} />
+ </Stack>
 }
