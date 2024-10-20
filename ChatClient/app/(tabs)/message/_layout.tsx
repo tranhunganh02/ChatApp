@@ -15,8 +15,7 @@ export default function _layout() {
             title: 'Message'
         }} />
         <Stack.Screen name="[id]" options={{
-            headerShown:true,
-            title: 'Room Chat'
+            headerShown:false
         }} />
     </Stack>
   )

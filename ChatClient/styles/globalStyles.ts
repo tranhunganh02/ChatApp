@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React, { Component } from 'react'
 import { appColors } from '../constants/appColor'
-import { fontFamilies } from '../constants/fontFamilies'
+import fontFamilies from '@/constants/fontFamilies'
 
 export const globalStyles = StyleSheet.create ({
 
@@ -13,7 +13,7 @@ export const globalStyles = StyleSheet.create ({
    text: {
       color: appColors.white,
       fontSize: 12,
-     fontFamily: fontFamilies.regular,
+     fontFamily: fontFamilies.poppinsRegular.fontFamily,
     },
     button: {
       borderRadius:12,

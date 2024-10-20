@@ -5,6 +5,7 @@ import IconButtonComponent from "./IconButtonComponent";
 import InputComponent from "./InputComponent";
 import ChatList from "./message/ChatListComponent";
 import UserList from "./message/UserList";
+import MessageItemComponent from "./roomChat/MessageItemComponent";
 import RowComponent from "./RowComponent";
 import SectionComponent from "./SectionComponent";
 import SpaceComponent from "./SpaceComponent";
@@ -21,5 +22,6 @@ export {
     CircleComponent,
     IconButtonComponent,
     UserList,
-    ChatList
+    ChatList,
+    MessageItemComponent
 }

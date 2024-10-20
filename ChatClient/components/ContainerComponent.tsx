@@ -7,18 +7,18 @@ import {
   StyleProp,
   ViewStyle,
   TouchableOpacity,
-  StatusBar,
   ColorValue,
 } from 'react-native';
 import React, { ReactNode } from 'react';
 import { globalStyles } from '../styles/globalStyles';
 import { useNavigation } from '@react-navigation/native';
-import { RowComponent, TextComponent } from '.';
-
+import { StatusBar } from 'expo-status-bar';
 import { appColors } from '../constants/appColor';
-import { fontFamilies } from '../constants/fontFamilies';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import RowComponent from './RowComponent';
+import TextComponent from './TextComponent';
+import fontFamilies from '@/constants/fontFamilies';
 
 interface Props {
   isImageBackground?: boolean;
@@ -61,7 +61,7 @@ const ContainerComponent = (props: Props) => {
               <TextComponent
                 text={title}
                 size={16}
-                font={fontFamilies.medium}
+                font={fontFamilies.acmeRegular.fontFamily}
                 flex={1}
               />
             ) : (
@@ -82,9 +82,10 @@ const ContainerComponent = (props: Props) => {
 
   return isImageBackground ? (
     <ImageBackground
-      //source={require('../assets/images/splash-img.png')}
+    source={require("@/assets/images/splash-image.png")}
       style={{ flex: 1 }}
       imageStyle={{ flex: 1 }}>
+                  <StatusBar style='light'/>
       <SafeAreaView style={{ flex: 1 }}>{headerComponent()}</SafeAreaView>
     </ImageBackground>
   ) : (
@@ -94,7 +95,7 @@ const ContainerComponent = (props: Props) => {
       </View>
       :
       <SafeAreaView style={[globalStyles.container]}>
-      
+          <StatusBar style='dark'/>
         {headerComponent()}
       </SafeAreaView>
   );

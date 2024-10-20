@@ -2,7 +2,7 @@ import { View, Text, StyleProp, TextStyle } from 'react-native'
 import React from 'react'
 import { appColors } from '../constants/appColor';
 import { globalStyles } from '../styles/globalStyles';
-import { fontFamilies } from '../constants/fontFamilies';
+import fontFamilies from '@/constants/fontFamilies';
 
 interface Props {
     text: string;
@@ -25,7 +25,7 @@ interface Props {
             color: color ?? appColors.text,
             flex: flex ?? 0,
             fontSize: size ?? title ? size : 12,
-            fontFamily: font ?? title ? fontFamilies.bold : fontFamilies.regular,
+            fontFamily: font ?? fontFamilies.poppinsRegular.fontFamily,
           },
           styles,
         ]}>

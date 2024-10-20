@@ -1,6 +1,8 @@
-import { User } from "./user/userData";
-import { Chat } from "./chat/chatData";
+import { User } from "./user/user";
+import { Chat } from "./chat/chat";
+import { Message } from "./chat/message";
 export {
     User,
-    Chat
+    Chat,
+    Message
 }

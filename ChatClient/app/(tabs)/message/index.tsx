@@ -55,16 +55,11 @@ const Messages = () => {
   ];
 
   return (
-    <ContainerComponent>
+    <ContainerComponent isImageBackground>
       <SectionComponent styles={{
-        padding: 0, height: heightScreen * 0.3, width: appInfo.sizes.WIDTH
+        paddingHorizontal:0, height: heightScreen * 0.3, width: appInfo.sizes.WIDTH
       }}>
-        <LinearGradient
-          colors={["#04081d", "#343573"]}
-          start={[0, 0]}
-          end={[1, 1]}
-          style={{ flex: 1 }}
-        >
+     
           <SectionComponent styles={{ paddingTop: 12 }}>
             <RowComponent justify='space-between'>
               <IconButtonComponent icon={<Ionicons name='search-outline' size={30} color={"white"} />} colorButton={"#363a4d"} />
@@ -79,7 +74,6 @@ const Messages = () => {
           <SectionComponent>
             <UserList userList={users} />
           </SectionComponent>
-        </LinearGradient>
       </SectionComponent>
 
       <View style={{
@@ -107,10 +101,10 @@ const ChatList = (props: ChatListProps) => {
 
   // Hàm render cho từng phần tử chat
   const renderChatItem = ({ item }: { item: Chat }) => {
-    const username = encodeURIComponent(item.userName); // Encode the username
+  
     const image = encodeURIComponent(item.image); // Encode the image URL
     return (
-      <Link  href={{ pathname: "/message/[id]", params: { id: item.id,  username: username, image: image }}}>
+      <Link  href={{ pathname: "/message/[id]", params: { id: item.id,  username: item.userName, image: image }}}>
       <SectionComponent  styles={styles.chatItem}>
         <Image source={{ uri: item.image }} style={styles.chatImage} />
         <View style={item.status ? styles.userOnline : styles.userOffline}></View>

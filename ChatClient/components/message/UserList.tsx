@@ -1,4 +1,5 @@
 import { User } from '@/data';
+import { Link } from 'expo-router';
 import React from 'react';
 import { View, Text, Image, FlatList, StyleSheet } from 'react-native';
 // userData.ts
@@ -19,10 +20,12 @@ const UserList = (props: Props) => {
       keyExtractor={(item) => item.id}
       contentContainerStyle={{ paddingHorizontal: 0 }}
       renderItem={({ item }) => (
+        <Link  href={{ pathname: "/message/[id]", params: { id: item.id,  username: item.name, image: item.image }}}>
         <View style={styles.userContainer}>
           <Image source={{ uri: item.image }} style={styles.userImage} />
           <Text style={styles.userName}>{item.name}</Text>
         </View>
+        </Link>
       )}
     />
   );

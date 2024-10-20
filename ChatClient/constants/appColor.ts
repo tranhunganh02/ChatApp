@@ -1,5 +1,5 @@
 export const appColors = {
-  primary: '#5669FF', // Keep primary color
+  primary: '#3D4A7A', // Keep primary color
   secondary: '#4A43EC', // Light gray for background
   text: '#120D26', // Main text color
   textSecondary: '#666666', // Secondary text color (e.g., for placeholders)

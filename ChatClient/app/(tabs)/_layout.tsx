@@ -24,7 +24,9 @@ export default function HomeLayout() {
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          display: pathname.startsWith('/message/') && !pathname.includes('/index') ? 'none' : 'flex',
+          display: pathname.startsWith('/message/') 
+          // && !pathname.includes('/index') 
+          ? 'none' : 'flex',
         },
         headerShown: false,
         tabBarActiveTintColor: appColors.activeIcon, // Màu sắc cho nhãn khi active
