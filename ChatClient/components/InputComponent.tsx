@@ -29,7 +29,7 @@ const InputComponent = (props: InputProps) => {
         <TextInput 
         textAlign='left'
           placeholderTextColor={appColors.gray}
-          style={[styles.input, {color: colorText}]}
+          style={[styles.input, {color: colorText, paddingTop:4}]}
           placeholder={placeholder ?? ''}
           onChangeText={val => onChange(val)}
           value={value}
@@ -38,6 +38,7 @@ const InputComponent = (props: InputProps) => {
           onEndEditing={onEnd}
           multiline={true} // Cho phép nhập nhiều dòng
         numberOfLines={1}
+      
         />
       {suffix ?? suffix}
       <TouchableOpacity
@@ -83,6 +84,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal:14,
     color: appColors.black,
-     textAlignVertical: 'top'
+    verticalAlign: 'top'
   }
 })

@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native'
 import React, { useState } from 'react'
-import { appInfo } from '@/constants/appInfors'
+import { appInfo, getDeviceType } from '@/constants/appInfors'
 import IconButtonComponent from '../IconButtonComponent'
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import RowComponent from '../RowComponent'
@@ -10,6 +10,7 @@ import SpaceComponent from '../SpaceComponent'
 const SendAndInputComponent = () => {
     const height = appInfo.sizes.HEIGHT
     const width = appInfo.sizes.WIDTH
+    const typeDevice = getDeviceType()
 
     const [content, setContent] = useState('');
   return (
@@ -21,19 +22,19 @@ const SendAndInputComponent = () => {
         position: "absolute",
         bottom:0,
         justifyContent:"center",
-        paddingHorizontal:16
+        paddingHorizontal: typeDevice === "mobile medium" ? 16 : typeDevice === "tablet" ? 22  : 30
     }}>
      <RowComponent justify='space-between'>
         <IconButtonComponent icon={<MaterialCommunityIcons name='attachment' size={24}/>}/>
         <InputComponent 
         customStyle={{
-            width: "57%",
+            width: typeDevice === "mobile medium" ? "65%" : "75%",
             height: appInfo.sizes.HEIGHT * 0.0492,
             borderWidth:0.8,
             borderRadius:12,
             borderColor: "#EDEDED",
             backgroundColor: "#F3F6F6",
-            paddingTop:4
+            padding:4,
         }}
         colorText='#797C7B'
         value={content} 

@@ -1,6 +1,6 @@
 import { View, Text, Image, FlatList } from 'react-native'
 import React from 'react'
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { ContainerComponent, IconButtonComponent, MessageItemComponent, RowComponent, SectionComponent, SpaceComponent, TextComponent } from '@/components';
 import { Ionicons } from '@expo/vector-icons';
 import { appColors } from '@/constants/appColor';
@@ -13,7 +13,7 @@ export default function Page() {
   const { id, username, image } = useLocalSearchParams();
   const route = useRouter()
 
-  const currentUserId = 1
+  const currentUserId:number = 1
 
   const messages: Message[] = [
     { senderId: 1, content: 'Hello!', time: '10:00 AM', status: true },

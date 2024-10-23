@@ -7,11 +7,11 @@ import { Message } from '@/data';
 
 interface MessageItemComponentProps {
   message: Message;
-  currentUserId: string;
+  currentUserId: number;
 }
 
 export default function MessageItemComponent({ message, currentUserId }: MessageItemComponentProps) {
-  const isCurrentUser = message.senderId === currentUserId;
+  const isCurrentUser = message.senderId == currentUserId;
 
   return (
     <View style={[

@@ -1,6 +1,6 @@
 // app/home/_layout.tsx
 import { Tabs, usePathname } from 'expo-router';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'; // Import thư viện biểu tượng
+import { Ionicons, MaterialIcons, AntDesign } from '@expo/vector-icons'; // Import thư viện biểu tượng
 import { appColors } from '@/constants/appColor';
 
 const renderTabIcon = (iconName: string, focused: boolean, size: number) => {
@@ -10,8 +10,8 @@ const renderTabIcon = (iconName: string, focused: boolean, size: number) => {
     return <Ionicons name={iconName} size={size} color={color} />;
   } else if (iconName === 'search') {
     return <MaterialIcons name={iconName} size={size} color={color} />;
-  } else if (iconName === 'person-outline') {
-    return <Ionicons name={iconName} size={size} color={color} />;
+  } else if (iconName === 'setting') {
+    return <AntDesign name={iconName} size={size} color={color} />;
   }
   return null;
 };
@@ -24,7 +24,7 @@ export default function HomeLayout() {
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          display: pathname.startsWith('/message/') 
+          display: pathname.startsWith('/message/') || pathname.startsWith('/setting/user') 
           // && !pathname.includes('/index') 
           ? 'none' : 'flex',
         },
@@ -48,10 +48,10 @@ export default function HomeLayout() {
         }} 
       />
       <Tabs.Screen 
-        name="user"  // Đặt tab user ở cuối cùng
+        name="setting"  // Đặt tab user ở cuối cùng
         options={{
-          tabBarLabel: 'User', // Nhãn cho tab
-          tabBarIcon: ({ size, focused }) => renderTabIcon('person-outline', focused, size),
+          tabBarLabel: 'Setting', // Nhãn cho tab
+          tabBarIcon: ({ size, focused }) => renderTabIcon('setting', focused, size),
         }} 
       />
     </Tabs>
