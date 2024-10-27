@@ -4,14 +4,15 @@ import ChatBackend.ChatBackend.dto.LoginDTO;
 import ChatBackend.ChatBackend.dto.LoginGGDTO;
 import ChatBackend.ChatBackend.dto.SignUpDTO;
 import ChatBackend.ChatBackend.entity.User;
+import ChatBackend.ChatBackend.exception.AuthenticationException;
 import ChatBackend.ChatBackend.repository.UserRepository;
+import ChatBackend.ChatBackend.response.JWTAuthResponse;
 import ChatBackend.ChatBackend.security.JwtTokenProvider;
 import ChatBackend.ChatBackend.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import ChatBackend.ChatBackend.exception.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private JwtTokenProvider jwtTokenProvider;
 
     @Override
-    public String login(LoginDTO loginDto) throws AuthenticationException {
+    public JWTAuthResponse login(LoginDTO loginDto) throws AuthenticationException {
 
         if (!userRepository.existsByEmail(loginDto.getEmail())) {
             throw new AuthenticationException("Tài khoản không tồn tại!");
@@ -44,8 +45,12 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String token = jwtTokenProvider.generateToken(authentication);
-
-        return token;
+        User user = userRepository.findByEmail(loginDto.getEmail())
+                .orElseThrow(() -> new AuthenticationException("Tài khoản không tồn tại!"));
+        JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
+        jwtAuthResponse.setAccessToken(token);
+        jwtAuthResponse.setUserId(user.getId());
+        return jwtAuthResponse;
     }
 
     @Override
@@ -66,34 +71,34 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String token = jwtTokenProvider.generateToken(authentication);
-
         return token;
     }
 
     @Override
-public String loginGG(LoginGGDTO loginGGDTO)
-        throws AuthenticationException, org.springframework.security.core.AuthenticationException {
+    public JWTAuthResponse loginGG(LoginGGDTO loginGGDTO)
+            throws AuthenticationException, org.springframework.security.core.AuthenticationException {
 
-    User user;
-    if (!userRepository.existsByEmail(loginGGDTO.getEmail())) {
-        // Nếu chưa có, tạo tài khoản mới
-        user = new User();
-        user.setEmail(loginGGDTO.getEmail());
-        user.setName(loginGGDTO.getGivenName() + " " + loginGGDTO.getFamilyName());
-        user.setGoogle(true); // Đánh dấu người dùng là đăng nhập qua Google
-        userRepository.save(user);
-    } else {
-        // Nếu đã có người dùng, lấy thông tin người dùng từ cơ sở dữ liệu
-        user = userRepository.findByEmail(loginGGDTO.getEmail())
-                .orElseThrow(() -> new AuthenticationException("Tài khoản không tồn tại!"));
+        User user;
+        if (!userRepository.existsByEmail(loginGGDTO.getEmail())) {
+            // Nếu chưa có, tạo tài khoản mới
+            user = new User();
+            user.setEmail(loginGGDTO.getEmail());
+            user.setName(loginGGDTO.getGivenName() + " " + loginGGDTO.getFamilyName());
+            user.setGoogle(true); // Đánh dấu người dùng là đăng nhập qua Google
+            userRepository.save(user);
+        } else {
+            // Nếu đã có người dùng, lấy thông tin người dùng từ cơ sở dữ liệu
+            user = userRepository.findByEmail(loginGGDTO.getEmail())
+                    .orElseThrow(() -> new AuthenticationException("Tài khoản không tồn tại!"));
+        }
+
+        // Tạo token mà không cần mật khẩu
+        String token = jwtTokenProvider.generateToken(new UsernamePasswordAuthenticationToken(user.getEmail(), null));
+        JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
+        jwtAuthResponse.setAccessToken(token);
+        jwtAuthResponse.setUserId(user.getId());
+        return jwtAuthResponse;
     }
 
-    // Tạo token mà không cần mật khẩu
-    String token = jwtTokenProvider.generateToken(new UsernamePasswordAuthenticationToken(user.getEmail(), null));
 
-    return token;
-}
-
-    
-    
 }

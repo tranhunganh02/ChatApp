@@ -7,7 +7,7 @@ export const appInfo = {
   },
   // BASE_URL: 'http://127.0.0.1:8001/v1/api/event_hub/',
   // BASE_URL: 'http://192.168.88.120:8001/v1/api/event_hub/',
-  BASE_URL: 'http://127.0.0.1:3333/api/'
+  BASE_URL: 'http://localhost:8080/api/v1/'
 };
 
 export const getDeviceType = () =>  {

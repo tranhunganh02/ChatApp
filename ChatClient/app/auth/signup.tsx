@@ -1,8 +1,9 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useState } from "react";
 import { Validate } from "@/utils/validate";
 import { ButtonComponent, ContainerComponent, InputComponent, SectionComponent, SpaceComponent, TextComponent } from "@/components";
 import fontFamilies from "@/constants/fontFamilies";
+import authenticationAPI from "@/apis/authApi";
 
 export default function SignUpScreen() {
   const [name, setName] = useState("");
@@ -18,6 +19,34 @@ export default function SignUpScreen() {
       setEmailError(true);
     } else {
       setEmailError(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    if (password == confirmPassword) {
+      try {
+        const res = await authenticationAPI.HandleAuthentication(
+          'auth/register',
+          {name ,email, password},
+          'post',
+        );
+        console.log(res.data);
+
+
+        
+        // dispatch(addAuth(res.data.metadata));
+
+        // await AsyncStorage.setItem(
+        //   'auth',
+        //  JSON.stringify(res.data.metadata),
+        // );
+
+        // router.replace("/message");
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      Alert.alert('Email is not correct!!!!');
     }
   };
 
@@ -89,7 +118,7 @@ export default function SignUpScreen() {
         <ButtonComponent
           text="Create an account"
           type="primary"
-          onPress={() => console.log("Log in pressed")}
+          onPress={handleRegister}
           textStyles={styles.loginText}
           styles={{ width: "100%" }}
           textColor="#fff"

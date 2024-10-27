@@ -1,43 +1,44 @@
-// import { View, Text, Button } from 'react-native'
-// import React from 'react'
-// import { Link } from 'expo-router'
-// import { StatusBar } from 'expo-status-bar'
 
-// export default function OnboardingPage() {
-//   return (
-//     <View style={{flex: 1, justifyContent:'center', alignItems: 'center'}}>
-//         {/* <StatusBar style="light" /> */}
-//       <Text>OnboardingPage</Text>
-//       <Link href="/auth/login" asChild>
-//         <Button title="Open login Page" />
-//       </Link>
-//       <Link href="/auth/signup" asChild>
-//         <Button title="Open register" />
-//       </Link>
-//     </View>
-//   )
-// }
 
 import { Text, StyleSheet, View, ImageBackground, Image } from "react-native";
 import React, { Component, useEffect, useState } from "react";
 import { appInfo } from "@/constants/appInfors";
 import fontFamilies from "@/constants/fontFamilies";
 import { useRouter } from "expo-router";
-
+import AsyncStorage, { useAsyncStorage } from '@react-native-async-storage/async-storage'
+import { useDispatch, useSelector } from 'react-redux'
+import { addAuth, authSelector, AuthState } from '../state/reducers/authReducer'
 export default function OnboardingPage() {
 
   const router = useRouter();  
 
+  const {getItem, setItem} = useAsyncStorage('auth')
+  const [isShowSplash, setIsShowSplash] = useState(true);
+  const dispatch = useDispatch()
+  const auth = useSelector(authSelector)
+  
   useEffect(() => {
-    // Use setTimeout to update the message after 2000 milliseconds (2 seconds)
-    const timeoutId = setTimeout(() => {
-      router.replace("/onboarding")
-    }, 2000);
-
-    // Cleanup function to clear the timeout if the component unmounts
-    return () => clearTimeout(timeoutId);
-  }, []); // Empty dependency array ensures the effect runs only once
-
+      checkLogin()
+      const timeout = setTimeout(() => {
+        setIsShowSplash(false);
+        router.replace("/(tabs)/message")
+      }, 2000);
+  
+      return () => clearTimeout(timeout);
+    }, [])
+  
+    const checkLogin = async () => { 
+      const data = await getItem()
+     
+      if (data) {
+        var convertData:AuthState =   JSON.parse(data)
+        dispatch(addAuth(convertData))
+        console.log("data da dang nhap truoc do",data);
+      }else  {
+        console.log("no data");
+        
+      }
+  }
   return (
     <ImageBackground
       source={require("../assets/images/splash-image.png")}

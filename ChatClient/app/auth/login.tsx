@@ -1,10 +1,13 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useState } from "react";
 import { Validate } from "@/utils/validate";
 import { ButtonComponent, ContainerComponent, IconButtonComponent, InputComponent, SectionComponent, SpaceComponent, TextComponent } from "@/components";
 import fontFamilies from "@/constants/fontFamilies";
 import { useRouter } from "expo-router";
-
+import { useDispatch } from "react-redux";
+import authenticationAPI from '../../apis/authApi'
+import { addAuth,AuthState } from "@/state/reducers/authReducer";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function LoginScreen() {
       
   const router = useRouter();  
@@ -13,6 +16,9 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
 
   const [emailError, setEmailError] = useState(false);
+
+
+  const dispatch = useDispatch();
 
   const handleEmailChange = (input: string) => {
     setEmail(input);
@@ -23,9 +29,35 @@ export default function LoginScreen() {
     }
   };
 
-  const handleLogin = () => {
-    router.replace("/message");
-  }
+  const handleLogin = async () => {
+    const emailValidation = Validate.email(email);
+    if (emailValidation) {
+      try {
+        const res = await authenticationAPI.HandleAuthentication(
+          'auth/login',
+          {email, password},
+          'post',
+        );
+        console.log(res.data);
+
+        var dataUser:AuthState  = res.data
+
+        dispatch(addAuth(dataUser));
+
+        await AsyncStorage.setItem(
+          'auth',
+         JSON.stringify(dataUser),
+        );
+
+    router.replace("/(tabs)/message");
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      Alert.alert('Email is not correct!!!!');
+    }
+  };
+
 
   return (
     <ContainerComponent isScroll back>
@@ -111,7 +143,7 @@ export default function LoginScreen() {
         />
         <InputComponent
           value={password}
-          onChange={setPassword}
+          onChange={val => setPassword(val)}
           isPassword
           affix={<TextComponent text="Password" styles={styles.affixInput} />}
         />

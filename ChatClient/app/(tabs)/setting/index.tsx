@@ -8,21 +8,36 @@ import {
   Image,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
+import { useDispatch } from "react-redux";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { removeAuth } from "@/state/reducers/authReducer";  // Cập nhật đường dẫn này nếu cần
 
 const UserSetting = () => {
+  const dispatch = useDispatch();
+  const  router  = useRouter()
+
+  const handleLogout = async () => {
+    // Xóa thông tin xác thực từ AsyncStorage
+    await AsyncStorage.removeItem('auth');
+    // Xóa thông tin xác thực từ Redux
+    dispatch(removeAuth());
+    // Có thể điều hướng người dùng đến trang đăng nhập hoặc trang chính
+    router.replace("/auth/login"); // Nếu bạn sử dụng react-navigation hoặc expo-router
+  };
+
   const item = [
     { icon: "person", text: "Account" },
     { icon: "chat", text: "Chat" },
     { icon: "notifications", text: "Notifications" },
     { icon: "help", text: "Help" },
     { icon: "cloud", text: "Storage and Data" },
-    { icon: "share", text: "Invite a Friend" },
+    { icon: "logout", text: "Logout", action: handleLogout }, // Thêm hành động logout
   ];
 
-  const renderOption = function (icon: string, text: string, id: number) {
+  const renderOption = function (icon: string, text: string, id: number, action?: () => void) {
     return (
-      <TouchableOpacity style={styles.option} key={""+id}>
+      <TouchableOpacity style={styles.option} key={"" + id} onPress={action}>
         <View style={styles.iconcontainer}>
           <MaterialIcons
             name={icon as any}
@@ -36,55 +51,29 @@ const UserSetting = () => {
       </TouchableOpacity>
     );
   };
+
+ 
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.topbar}></View>
       {/* Profile Section */}
-      <Link  href={{pathname: "/setting/user"}}>
-      <View style={styles.profileContainer}>
-        <Image
-          source={{ uri: "https://via.placeholder.com/100" }} // Add the actual profile image URL here
-          style={styles.profileImage}
-        />
-        <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>Nazrul Islam</Text>
-          <Text style={styles.profileStatus}>Never give up 💪</Text>
+      <Link href={{ pathname: "/setting/user" }}>
+        <View style={styles.profileContainer}>
+          <Image
+            source={{ uri: "https://via.placeholder.com/100" }} // Add the actual profile image URL here
+            style={styles.profileImage}
+          />
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>Nazrul Islam</Text>
+            <Text style={styles.profileStatus}>Never give up 💪</Text>
+          </View>
         </View>
-      </View>
       </Link>
 
       {/* Settings Options */}
       <View style={styles.optionContainer}>
-        {item.map((i, index) => renderOption(i.icon, i.text, index))}
-        {/* <TouchableOpacity style={styles.option}>
-          <Ionicons name="person-outline" size={24} color="gray" />
-          <Text style={styles.optionText}>Account</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.option}>
-          <MaterialIcons name="chat" size={24} color="gray" />
-          <Text style={styles.optionText}>Chat</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.option}>
-          <Ionicons name="notifications-outline" size={24} color="gray" />
-          <Text style={styles.optionText}>Notifications</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.option}>
-          <Ionicons name="help-circle-outline" size={24} color="gray" />
-          <Text style={styles.optionText}>Help</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.option}>
-          <Ionicons name="cloud-outline" size={24} color="gray" />
-          <Text style={styles.optionText}>Storage and Data</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.option}>
-          <Ionicons name="share-outline" size={24} color="gray" />
-          <Text style={styles.optionText}>Invite a Friend</Text>
-        </TouchableOpacity> */}
+        {item.map((i, index) => renderOption(i.icon, i.text, index, i.action))}
       </View>
     </ScrollView>
   );
@@ -112,8 +101,8 @@ const styles = StyleSheet.create({
   },
   profileContainer: {
     flexDirection: "row",
-    width:"100%",
-    alignItems:"center",
+    width: "100%",
+    alignItems: "center",
     backgroundColor: "#fff",
     padding: 20,
     borderBottomWidth: 1,
@@ -145,8 +134,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
     backgroundColor: "#fff",
-    // borderBottomWidth: 1,
-    // borderBottomColor: "#f0f0f0",
   },
   optionText: {
     marginLeft: 20,

@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Button } from 'react-native';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { configureStore } from "@reduxjs/toolkit";
+import { Provider } from "react-redux";
+import store from '@/state/store';
 
-
-export default function RootLayout() {
+function RootLayout() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isLogin, setIsLogin] = useState(false);
@@ -44,3 +46,15 @@ export default function RootLayout() {
         }} />
  </Stack>
 }
+
+
+const App = () => {
+   return (
+     <Provider store={store}>
+       <RootLayout />
+     </Provider>
+   );
+ };
+ 
+ export default App;
+ 

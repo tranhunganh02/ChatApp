@@ -1,12 +1,14 @@
 package ChatBackend.ChatBackend.controller;
 
 import ChatBackend.ChatBackend.dto.LoginDTO;
+import ChatBackend.ChatBackend.dto.LoginGGDTO;
 import ChatBackend.ChatBackend.dto.SignUpDTO;
 import ChatBackend.ChatBackend.exception.AuthenticationException;
 import ChatBackend.ChatBackend.response.JWTAuthResponse;
 import ChatBackend.ChatBackend.service.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,15 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/auth")
+@CrossOrigin("http://localhost:8081")
 public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<JWTAuthResponse> authenticate(@RequestBody LoginDTO loginDto) throws AuthenticationException {
-        String token = authService.login(loginDto);
-
-        JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
-        jwtAuthResponse.setAccessToken(token);
+        JWTAuthResponse jwtAuthResponse = authService.login(loginDto);
 
         return ResponseEntity.ok(jwtAuthResponse);
     }
@@ -40,11 +40,11 @@ public class AuthController {
 
 
     @PostMapping("/login-gg")
-    public ResponseEntity<JWTAuthResponse> authenticateGG(@RequestBody LoginDTO loginDto) throws AuthenticationException {
-        String token = authService.login(loginDto);
+    public ResponseEntity<JWTAuthResponse> authenticateGG(@RequestBody LoginGGDTO loginGGDto) throws AuthenticationException {
+        JWTAuthResponse jwtAuthResponse = authService.loginGG(loginGGDto);
 
-        JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
-        jwtAuthResponse.setAccessToken(token);
+//        JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
+//        jwtAuthResponse.setAccessToken(token);
 
         return ResponseEntity.ok(jwtAuthResponse);
     }
