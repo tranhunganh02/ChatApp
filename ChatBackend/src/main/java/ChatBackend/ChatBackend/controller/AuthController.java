@@ -37,4 +37,15 @@ public class AuthController {
 
         return ResponseEntity.ok(jwtAuthResponse);
     }
+
+
+    @PostMapping("/login-gg")
+    public ResponseEntity<JWTAuthResponse> authenticateGG(@RequestBody LoginDTO loginDto) throws AuthenticationException {
+        String token = authService.login(loginDto);
+
+        JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
+        jwtAuthResponse.setAccessToken(token);
+
+        return ResponseEntity.ok(jwtAuthResponse);
+    }
 }

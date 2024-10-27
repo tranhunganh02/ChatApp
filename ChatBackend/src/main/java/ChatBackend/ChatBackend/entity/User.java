@@ -25,7 +25,6 @@ public class User {
 
     private String password;
 
-    @Column(name = "google_id")
-    private String googleId;
-
+    @Column(name = "isGoogle")
+    private boolean isGoogle = false; // Đặt giá trị mặc định là false
 }

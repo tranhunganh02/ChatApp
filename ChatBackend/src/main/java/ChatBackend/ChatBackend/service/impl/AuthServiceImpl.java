@@ -1,6 +1,7 @@
 package ChatBackend.ChatBackend.service.impl;
 
 import ChatBackend.ChatBackend.dto.LoginDTO;
+import ChatBackend.ChatBackend.dto.LoginGGDTO;
 import ChatBackend.ChatBackend.dto.SignUpDTO;
 import ChatBackend.ChatBackend.entity.User;
 import ChatBackend.ChatBackend.repository.UserRepository;
@@ -68,4 +69,31 @@ public class AuthServiceImpl implements AuthService {
 
         return token;
     }
+
+    @Override
+public String loginGG(LoginGGDTO loginGGDTO)
+        throws AuthenticationException, org.springframework.security.core.AuthenticationException {
+
+    User user;
+    if (!userRepository.existsByEmail(loginGGDTO.getEmail())) {
+        // Nếu chưa có, tạo tài khoản mới
+        user = new User();
+        user.setEmail(loginGGDTO.getEmail());
+        user.setName(loginGGDTO.getGivenName() + " " + loginGGDTO.getFamilyName());
+        user.setGoogle(true); // Đánh dấu người dùng là đăng nhập qua Google
+        userRepository.save(user);
+    } else {
+        // Nếu đã có người dùng, lấy thông tin người dùng từ cơ sở dữ liệu
+        user = userRepository.findByEmail(loginGGDTO.getEmail())
+                .orElseThrow(() -> new AuthenticationException("Tài khoản không tồn tại!"));
+    }
+
+    // Tạo token mà không cần mật khẩu
+    String token = jwtTokenProvider.generateToken(new UsernamePasswordAuthenticationToken(user.getEmail(), null));
+
+    return token;
+}
+
+    
+    
 }
