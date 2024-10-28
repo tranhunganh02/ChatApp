@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "chats")
@@ -24,6 +25,9 @@ public class Chat {
 
     @Column(name = "is_group")
     private Boolean isGroup;
+
+    @Column(name = "chat_image")
+    private String chatImage;
 
     private LocalDateTime createdAt;
 
@@ -42,5 +46,5 @@ public class Chat {
             joinColumns = @JoinColumn(name = "chat_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> members;
+    private Set<User> members;
 }

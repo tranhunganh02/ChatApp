@@ -1,4 +1,4 @@
-package ChatBackend.ChatBackend.response;
+package ChatBackend.ChatBackend.payload.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

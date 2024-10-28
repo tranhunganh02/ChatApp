@@ -6,7 +6,7 @@ import ChatBackend.ChatBackend.dto.SignUpDTO;
 import ChatBackend.ChatBackend.entity.User;
 import ChatBackend.ChatBackend.exception.AuthenticationException;
 import ChatBackend.ChatBackend.repository.UserRepository;
-import ChatBackend.ChatBackend.response.JWTAuthResponse;
+import ChatBackend.ChatBackend.payload.response.JWTAuthResponse;
 import ChatBackend.ChatBackend.security.JwtTokenProvider;
 import ChatBackend.ChatBackend.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
