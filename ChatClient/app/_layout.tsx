@@ -7,6 +7,7 @@ import { View, ActivityIndicator, Button } from 'react-native';
 import { configureStore } from "@reduxjs/toolkit";
 import { Provider } from "react-redux";
 import store from '@/state/store';
+import { CallListener } from '@/components';
 
 function RootLayout() {
   const router = useRouter();
@@ -41,9 +42,36 @@ function RootLayout() {
        <Stack.Screen name="(tabs)" options={{
         headerShown: false
       }} />
-       <Stack.Screen name="[missing]" options={{
-            title: '404'
-        }} />
+      {/* Trang không nằm trong bottom tab */}
+      <Stack.Screen
+        name="call/incoming"
+        options={{
+          headerShown: false , 
+          title: 'Incoming Call',
+          presentation: 'modal', // Hiển thị dưới dạng modal
+        }}
+      />
+      <Stack.Screen
+        name="call/video"
+        options={{
+          headerShown: false , 
+          title: 'Video Call',
+          presentation: 'modal',
+        }}
+      />
+      {/* <Stack.Screen
+        name="calls/group"
+        options={{
+          title: 'Group Call',
+          presentation: 'modal',
+        }}
+      /> */}
+      <Stack.Screen
+        name="[missing]"
+        options={{
+          title: '404',
+        }}
+      />
  </Stack>
 }
 
@@ -51,6 +79,7 @@ function RootLayout() {
 const App = () => {
    return (
      <Provider store={store}>
+       <CallListener />
        <RootLayout />
      </Provider>
    );

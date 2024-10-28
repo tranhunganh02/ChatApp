@@ -21,7 +21,8 @@ export default function OnboardingPage() {
       checkLogin()
       const timeout = setTimeout(() => {
         setIsShowSplash(false);
-        router.replace("/(tabs)/message")
+        // router.replace("/(tabs)/message")
+        router.replace("/call/incoming")
       }, 2000);
   
       return () => clearTimeout(timeout);
