@@ -117,7 +117,7 @@ public class ChatServiceImpl implements ChatService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new DataNotFoundException("Người dùng không tồn tại!"));
 
-        List<Chat> chats = chatRepository.findByUserId(user.getId());
+        List<Chat> chats = chatRepository.findByUserId(user);
 
         return chats;
     }

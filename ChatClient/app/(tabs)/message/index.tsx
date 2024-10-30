@@ -1,6 +1,6 @@
 // messages.tsx
 import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'expo-router';
 import { CircleComponent, ContainerComponent, IconButtonComponent, RowComponent, SectionComponent, SpaceComponent, TextComponent, UserList } from '@/components';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,53 +8,54 @@ import { appColors } from '@/constants/appColor';
 import { LinearGradient } from 'expo-linear-gradient';
 import { appInfo } from '@/constants/appInfors';
 import { User, Chat } from '@/data';
+import { authSelector, AuthState } from '@/state/reducers/authReducer';
+import { useSelector } from 'react-redux';
+import authenticationAPI from '@/apis/authApi';
+import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 
 const Messages = () => {
   const heightScreen = appInfo.sizes.HEIGHT;
 
-  const users: User[] = [
-    { id: '1', name: 'John Doe', image: 'https://randomuser.me/api/portraits/men/1.jpg' },
-    { id: '2', name: 'Jane Smith', image: 'https://randomuser.me/api/portraits/women/1.jpg' },
-    { id: '3', name: 'Alice Johnson', image: 'https://randomuser.me/api/portraits/women/2.jpg' },
-    { id: '4', name: 'Bob Brown', image: 'https://randomuser.me/api/portraits/men/2.jpg' },
-  ];
+  //const auth: AuthState = useSelector(authSelector);
+  const [chatData, setChatData] = useState<Chat[]>([]);
+  const [currentUser, setCurrentUser] = useState<AuthState>()
+  const {getItem} = useAsyncStorage('auth')
+  const auth:AuthState = useSelector(authSelector);
 
-  const chatData: Chat[] = [
-    {
-      id: '1',
-      userName: 'John Doe',
-      image: 'https://randomuser.me/api/portraits/men/1.jpg',
-      content: 'Hey, how are you?',
-      time: '10:45 AM',
-      status: true
-    },
-    {
-      id: '2',
-      userName: 'Jane Smith',
-      image: 'https://randomuser.me/api/portraits/women/1.jpg',
-      content: 'I am good, thanks!',
-      time: '10:50 AM',
-      status: false
-    },
-    {
-      id: '3',
-      userName: 'Alice Johnson',
-      image: 'https://randomuser.me/api/portraits/women/2.jpg',
-      content: 'Let\'s meet at 5 PM.',
-      time: '11:00 AM',
-      status: true
-    },
-    {
-      id: '4',
-      userName: 'Bob Brown',
-      image: 'https://randomuser.me/api/portraits/men/2.jpg',
-      content: 'Can you send the report?',
-      time: '11:30 AM',
-      status: true
-    }
-  ];
 
-  return (
+  const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    const fetchChatData = async () => {
+      if (auth && auth.accessToken) {
+        try {
+          console.log(`AccessToken : ${auth.accessToken}`);
+          const response = await authenticationAPI.HandleAuthentication(
+            'chats/user',
+            auth.accessToken,
+            undefined,
+            "get"
+          );
+          setChatData(response.data);
+        } catch (error) {
+          console.error('Error fetching chat data:', error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        console.error('No user data found');
+        setLoading(false);
+      }
+    };
+  
+    fetchChatData();
+  }, [auth]);  // Add auth as a dependency
+  
+  
+
+  return loading ? <>
+
+  
+  </> : (
     <ContainerComponent isImageBackground>
       <SectionComponent styles={{
         paddingHorizontal:0, height: heightScreen * 0.3, width: appInfo.sizes.WIDTH
@@ -71,9 +72,9 @@ const Messages = () => {
             </RowComponent>
           </SectionComponent>
           <SpaceComponent height={40} />
-          <SectionComponent>
+          {/* <SectionComponent>
             <UserList userList={users} />
-          </SectionComponent>
+          </SectionComponent> */}
       </SectionComponent>
 
       <View style={{
@@ -83,7 +84,7 @@ const Messages = () => {
         bottom:20,
         paddingHorizontal: 4
       }}>
-        <ChatList chatList={chatData} />
+        <ChatList chatList={chatData} currentId={auth.id}/>
       </View>
     </ContainerComponent>
   );
@@ -94,35 +95,48 @@ export default Messages;
 
 interface ChatListProps {
   chatList: Chat[];
+  currentId: String;
 }
 
 const ChatList = (props: ChatListProps) => {
-  const { chatList } = props;
+  const { chatList, currentId } = props;
 
-  // Hàm render cho từng phần tử chat
   const renderChatItem = ({ item }: { item: Chat }) => {
-  
-    const image = encodeURIComponent(item.image); // Encode the image URL
+    let chatImage;
+    let userName;
+
+    if (item.isGroup) {
+      chatImage = item.chatImage; // Sử dụng chatImage cho nhóm
+      userName = item.user.name; // Giả sử bạn lấy tên nhóm từ user
+    } else {
+      // Tìm user khác không phải là currentId trong members
+      const otherMember = item.members.find(member => member.id != currentId);
+      userName = otherMember?.name; // Lấy tên của user khác
+    }
     return (
-      <Link  href={{ pathname: "/message/[id]", params: { id: item.id,  username: item.userName, image: image }}}>
-      <SectionComponent  styles={styles.chatItem}>
-        <Image source={{ uri: item.image }} style={styles.chatImage} />
-        <View style={item.status ? styles.userOnline : styles.userOffline}></View>
-        <View style={styles.chatDetails}>
-          <Text style={styles.userName}>{item.userName}</Text>
-          <Text style={styles.messageContent}>{item.content}</Text>
-        </View>
-        <Text style={styles.messageTime}>{item.time}</Text>
-      </SectionComponent>
+      <Link href={{ pathname: "/message/[id]", params: { id: item.id, username: userName, image: chatImage } }}>
+          <SectionComponent styles={styles.chatItem}>
+            { 
+            chatImage ? <Image source={{ uri: chatImage }} style={styles.chatImage} />
+            :
+            <Image source={require('@/assets/images/avatar_default.jpeg')} style={styles.chatImage} />
+
+            }
+            
+              <View style={styles.chatDetails}>
+                  <Text style={styles.userName}>{userName}</Text>
+                  {/* Thêm mã khác nếu cần */}
+              </View>
+              <Text style={styles.messageTime}>{item.createdAt}</Text>
+          </SectionComponent>
       </Link>
-    );
+  );
   };
 
   return (
     <FlatList
-    
       data={chatList}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item.id.toString()}
       renderItem={renderChatItem}
       contentContainerStyle={styles.listContainer}
     />

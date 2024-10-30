@@ -35,23 +35,30 @@ export default function LoginScreen() {
       try {
         const res = await authenticationAPI.HandleAuthentication(
           'auth/login',
-          {email, password},
-          'post',
+          undefined,
+          { email, password },
+          'post'
         );
-        console.log(res.data);
-
-        var dataUser:AuthState  = res.data
-
-        dispatch(addAuth(dataUser));
-
-        await AsyncStorage.setItem(
-          'auth',
-         JSON.stringify(dataUser),
-        );
-
-    router.replace("/(tabs)/message");
+    
+        console.log('API response:', res.data); // Log API response
+    
+        if (res.data && res.data.accessToken) {
+          const dataUser: AuthState = {
+            id: res.data.id, // Thêm id vào đây nếu cần
+            email: res.data.email,
+            accessToken: res.data.accessToken,
+          };
+    
+          console.log("Data user being dispatched:", dataUser); // Log data user
+    
+          dispatch(addAuth(dataUser));
+          await AsyncStorage.setItem('auth', JSON.stringify(dataUser));
+          router.replace("/(tabs)/message");
+        } else {
+          console.error("No access token received");
+        }
       } catch (error) {
-        console.log(error);
+        console.log('Login error:', error);
       }
     } else {
       Alert.alert('Email is not correct!!!!');

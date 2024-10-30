@@ -10,7 +10,6 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(async (config: any) => {
   config.headers = {
-    Authorization: '',
     Accept: 'application/json',
     ...config.headers,
   };

@@ -22,16 +22,20 @@ export default function Page() {
   ];
   
 
+
   return (
     <ContainerComponent>
       <SectionComponent styles={[globalStyles.shadow, {width:"100%"}]}>
         <RowComponent justify='space-between'>
             <IconButtonComponent icon={<Ionicons name='arrow-back' size={22}/>} onPress={() => route.back()}/>
             <RowComponent>
-            <Image
-                source={{ uri: image.toString() }}
-                style={{ width: 50, height: 50, borderRadius: 25 }}
-              />
+            { 
+            image ? <Image source={{ uri:image+"" }}  style={{ width: 50, height: 50, borderRadius: 25 }} />
+            :
+            <Image source={require('@/assets/images/avatar_default.jpeg')}  style={{ width: 50, height: 50, borderRadius: 25 }} />
+
+            }
+
               <SectionComponent>
                 <TextComponent text={username.toString()} font={fontFamilies.acmeRegular.fontFamily} size={24}/>
                 <TextComponent text={"active now"} color={appColors.gray} title/>

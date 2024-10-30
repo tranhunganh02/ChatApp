@@ -10,11 +10,6 @@ import store from '@/state/store';
 import { CallListener } from '@/components';
 
 function RootLayout() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLogin, setIsLogin] = useState(false);
-
-  // Dù có điều hướng hay không, Stack phải được render
   return <Stack
   screenOptions={{
       // headerStyle: {
@@ -77,6 +72,7 @@ function RootLayout() {
 
 
 const App = () => {
+  
    return (
      <Provider store={store}>
        <CallListener />
