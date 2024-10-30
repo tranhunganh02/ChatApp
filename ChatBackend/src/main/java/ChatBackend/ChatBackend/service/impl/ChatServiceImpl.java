@@ -1,6 +1,7 @@
 package ChatBackend.ChatBackend.service.impl;
 
 import ChatBackend.ChatBackend.entity.Chat;
+import ChatBackend.ChatBackend.entity.Message;
 import ChatBackend.ChatBackend.entity.User;
 import ChatBackend.ChatBackend.exception.DataNotFoundException;
 import ChatBackend.ChatBackend.exception.InvalidParamException;
@@ -8,7 +9,11 @@ import ChatBackend.ChatBackend.payload.request.AddUserToGroupRequest;
 import ChatBackend.ChatBackend.payload.request.GroupChatRequest;
 import ChatBackend.ChatBackend.payload.request.RenameGroupRequest;
 import ChatBackend.ChatBackend.payload.request.SingleChatRequest;
+import ChatBackend.ChatBackend.payload.response.ChatResponse;
+import ChatBackend.ChatBackend.payload.response.MessageResponse;
+import ChatBackend.ChatBackend.payload.response.UserResponse;
 import ChatBackend.ChatBackend.repository.ChatRepository;
+import ChatBackend.ChatBackend.repository.MessageRepository;
 import ChatBackend.ChatBackend.repository.UserRepository;
 import ChatBackend.ChatBackend.security.JwtTokenProvider;
 import ChatBackend.ChatBackend.service.ChatService;
@@ -36,8 +41,11 @@ public class ChatServiceImpl implements ChatService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    MessageRepository messageRepository;
+
     @Override
-    public Chat createGroup(GroupChatRequest req, String token) {
+    public ChatResponse createGroup(GroupChatRequest req, String token) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new DataNotFoundException("Người dùng không tồn tại!"));
@@ -62,7 +70,10 @@ public class ChatServiceImpl implements ChatService {
         chat.setUser(user);
         chatRepository.save(chat);
 
-        return chat;
+        ChatResponse response = new ChatResponse().fromChat(chat);
+        List<Message> messages = messageRepository.findLastMessagesByChatId(chat.getId());
+        response.setLastMessage(messages.isEmpty() ? null : new MessageResponse().fromMessage(messages.get(0)));
+        return response;
     }
 
 //    @Override
@@ -98,7 +109,7 @@ public class ChatServiceImpl implements ChatService {
 //    }
 
     @Override
-    public Chat findChatById(Integer chatId, String token) {
+    public ChatResponse findChatById(Integer chatId, String token) {
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new DataNotFoundException("Chat không tồn tại!"));
         String email = jwtTokenProvider.getEmail(token.substring(7));
@@ -108,22 +119,33 @@ public class ChatServiceImpl implements ChatService {
         if (!chat.getMembers().contains(user)) {
             throw new InvalidParamException("Bạn không phải là thành viên của chat!");
         }
-        return chat;
+
+        ChatResponse response = new ChatResponse().fromChat(chat);
+        List<Message> messages = messageRepository.findLastMessagesByChatId(chat.getId());
+        response.setLastMessage(messages.isEmpty() ? null : new MessageResponse().fromMessage(messages.get(0)));
+        return response;
     }
 
     @Override
-    public List<Chat> findAllChats(String token) {
+    public List<ChatResponse> findAllChats(String token) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new DataNotFoundException("Người dùng không tồn tại!"));
 
-        List<Chat> chats = chatRepository.findByUserId(user.getId());
+        List<Chat> chats = chatRepository.findChatByMembers(user);
+        List<ChatResponse> chatResponses = new ArrayList<>();
+        for (Chat chat : chats) {
+            ChatResponse response = new ChatResponse().fromChat(chat);
+            List<Message> messages = messageRepository.findLastMessagesByChatId(chat.getId());
+            response.setLastMessage(messages.isEmpty() ? null : new MessageResponse().fromMessage(messages.get(0)));
+            chatResponses.add(response);
+        }
 
-        return chats;
+        return chatResponses;
     }
 
     @Override
-    public Chat addUserToGroup(String token, AddUserToGroupRequest request, Integer chatId) {
+    public ChatResponse addUserToGroup(String token, AddUserToGroupRequest request, Integer chatId) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new DataNotFoundException("Người dùng không tồn tại!"));
@@ -151,11 +173,17 @@ public class ChatServiceImpl implements ChatService {
             throw new InvalidParamException("Nhóm phải có ít nhất 3 thành viên!");
         }
 
-        return chatRepository.save(existingChat);
+        chatRepository.save(existingChat);
+
+        ChatResponse response = new ChatResponse().fromChat(existingChat);
+        List<Message> messages = messageRepository.findLastMessagesByChatId(existingChat.getId());
+        response.setLastMessage(messages.isEmpty() ? null : new MessageResponse().fromMessage(messages.get(0)));
+
+        return response;
     }
 
     @Override
-    public Chat renameGroup(Integer chatId, RenameGroupRequest request, String token) {
+    public ChatResponse renameGroup(Integer chatId, RenameGroupRequest request, String token) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new DataNotFoundException("Người nhắn không tồn tại!"));
@@ -167,11 +195,16 @@ public class ChatServiceImpl implements ChatService {
 
         existingChat.setName(request.getGroupName());
 
-        return chatRepository.save(existingChat);
+        chatRepository.save(existingChat);
+        ChatResponse response = new ChatResponse().fromChat(existingChat);
+        List<Message> messages = messageRepository.findLastMessagesByChatId(existingChat.getId());
+        response.setLastMessage(messages.isEmpty() ? null : new MessageResponse().fromMessage(messages.get(0)));
+
+        return response;
     }
 
     @Override
-    public Chat removeFromGroup(Integer chatId, Integer userId, String token) {
+    public ChatResponse removeFromGroup(Integer chatId, Integer userId, String token) {
         String email = jwtTokenProvider.getEmail(token.substring(7));
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new DataNotFoundException("Người nhắn không tồn tại!"));
@@ -189,7 +222,11 @@ public class ChatServiceImpl implements ChatService {
         }
         members.remove(userToRemove);
 
-        return chatRepository.save(existingChat);
+        chatRepository.save(existingChat);
+        ChatResponse response = new ChatResponse().fromChat(existingChat);
+        List<Message> messages = messageRepository.findLastMessagesByChatId(existingChat.getId());
+        response.setLastMessage(messages.isEmpty() ? null : new MessageResponse().fromMessage(messages.get(0)));
+        return response;
     }
 
     @Override
@@ -208,7 +245,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat uploadGroupChatImage(Integer chatId, String token, MultipartFile file) throws IOException {
+    public ChatResponse uploadGroupChatImage(Integer chatId, String token, MultipartFile file) throws IOException {
         Chat existingChat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new DataNotFoundException("Nhóm không tồn tại!"));
 
@@ -237,7 +274,12 @@ public class ChatServiceImpl implements ChatService {
 
         existingChat.setChatImage(fileName);
         chatRepository.save(existingChat);
-        return existingChat;
+
+        ChatResponse response = new ChatResponse().fromChat(existingChat);
+        List<Message> messages = messageRepository.findLastMessagesByChatId(existingChat.getId());
+        response.setLastMessage(messages.isEmpty() ? null : new MessageResponse().fromMessage(messages.get(0)));
+
+        return response;
     }
 
     private String storeFile(MultipartFile file) throws IOException {
