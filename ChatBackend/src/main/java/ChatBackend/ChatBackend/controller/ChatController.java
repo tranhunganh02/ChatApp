@@ -31,14 +31,14 @@ public class ChatController {
         return ResponseEntity.ok(chat);
     }
 
-    @PostMapping("/singles")
-    public ResponseEntity<Chat> createSingleChat(
-            @RequestBody SingleChatRequest request,
-            @RequestHeader("Authorization") String jwt
-    ) {
-        Chat chat = chatService.createSingleChat(jwt, request);
-        return ResponseEntity.ok(chat);
-    }
+//    @PostMapping("/singles")
+//    public ResponseEntity<Chat> createSingleChat(
+//            @RequestBody SingleChatRequest request,
+//            @RequestHeader("Authorization") String jwt
+//    ) {
+//        Chat chat = chatService.createSingleChat(jwt, request);
+//        return ResponseEntity.ok(chat);
+//    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Chat> findChatById(

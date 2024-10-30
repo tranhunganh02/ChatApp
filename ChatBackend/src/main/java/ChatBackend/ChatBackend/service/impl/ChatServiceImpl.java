@@ -65,37 +65,37 @@ public class ChatServiceImpl implements ChatService {
         return chat;
     }
 
-    @Override
-    public Chat createSingleChat(String token, SingleChatRequest request) {
-        String email = jwtTokenProvider.getEmail(token.substring(7));
-        User user1 = userRepository.findByEmail(email)
-                .orElseThrow(() -> new DataNotFoundException("Người nhắn không tồn tại!"));
-
-        User user2 = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new DataNotFoundException("Người nhận không tồn tại!"));
-
-        if (user1.getId().equals(user2.getId())) {
-            throw new InvalidParamException("Không thể tạo chat với chính mình!");
-        }
-
-        Chat existingChat = chatRepository.findSingleChatByUserId(user1, user2);
-
-        if (existingChat != null) {
-            return existingChat;
-        }
-
-        Chat chat = new Chat();
-        chat.setUser(user1);
-
-        Set<User> members = new HashSet<>();
-        members.add(user1);
-        members.add(user2);
-
-        chat.setMembers(members);
-        chat.setIsGroup(false);
-
-        return chatRepository.save(chat);
-    }
+//    @Override
+//    public Chat createSingleChat(String token, SingleChatRequest request) {
+//        String email = jwtTokenProvider.getEmail(token.substring(7));
+//        User user1 = userRepository.findByEmail(email)
+//                .orElseThrow(() -> new DataNotFoundException("Người nhắn không tồn tại!"));
+//
+//        User user2 = userRepository.findById(request.getUserId())
+//                .orElseThrow(() -> new DataNotFoundException("Người nhận không tồn tại!"));
+//
+//        if (user1.getId().equals(user2.getId())) {
+//            throw new InvalidParamException("Không thể tạo chat với chính mình!");
+//        }
+//
+//        Chat existingChat = chatRepository.findSingleChatByUser(user1, user2);
+//
+//        if (existingChat != null) {
+//            return existingChat;
+//        }
+//
+//        Chat chat = new Chat();
+//        chat.setUser(user1);
+//
+//        Set<User> members = new HashSet<>();
+//        members.add(user1);
+//        members.add(user2);
+//
+//        chat.setMembers(members);
+//        chat.setIsGroup(false);
+//
+//        return chatRepository.save(chat);
+//    }
 
     @Override
     public Chat findChatById(Integer chatId, String token) {

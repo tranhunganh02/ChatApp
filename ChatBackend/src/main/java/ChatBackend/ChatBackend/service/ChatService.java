@@ -13,7 +13,7 @@ import java.util.Set;
 
 public interface ChatService {
     Chat createGroup(GroupChatRequest req, String token);
-    Chat createSingleChat(String token, SingleChatRequest request);
+//    Chat createSingleChat(String token, SingleChatRequest request);
     Chat findChatById(Integer chatId, String token);
     List<Chat> findAllChats(String token);
     Chat addUserToGroup(String token, AddUserToGroupRequest request, Integer chatId);
