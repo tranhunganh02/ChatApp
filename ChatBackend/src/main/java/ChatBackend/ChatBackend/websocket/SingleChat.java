@@ -1,6 +1,7 @@
 package ChatBackend.ChatBackend.websocket;
 
 import ChatBackend.ChatBackend.entity.Message;
+import ChatBackend.ChatBackend.payload.response.MessageResponse;
 import ChatBackend.ChatBackend.service.MessageService;
 import ChatBackend.ChatBackend.websocket.dto.SingleMessageSendDto;
 import jakarta.transaction.Transactional;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Controller;
 import java.security.Principal;
 
 @Controller
-public class RealTimeChat {
+public class SingleChat {
     @Autowired
     SimpMessagingTemplate messagingTemplate;
 
@@ -24,8 +25,8 @@ public class RealTimeChat {
     @MessageMapping("/user.sendMessage")
     @SendToUser("/queue/reply")
     @Transactional
-    public Message sendMessage(@Payload SingleMessageSendDto msg, Principal principal) {
-        Message message = messageService.sendMessage(msg, principal.getName());
+    public MessageResponse sendMessage(@Payload SingleMessageSendDto msg, Principal principal) {
+        MessageResponse message = messageService.sendMessage(msg, principal.getName());
 
         messagingTemplate.convertAndSendToUser(
                 msg.getRecipientId().toString(),

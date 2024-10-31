@@ -17,7 +17,7 @@ public class File {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "message_id")
     private Message message;
 
