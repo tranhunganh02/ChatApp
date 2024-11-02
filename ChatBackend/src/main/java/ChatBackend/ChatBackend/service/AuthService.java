@@ -7,7 +7,9 @@ import ChatBackend.ChatBackend.exception.AuthenticationException;
 import ChatBackend.ChatBackend.payload.response.JWTAuthResponse;
 
 public interface AuthService {
-   JWTAuthResponse login(LoginDTO loginDTO) throws AuthenticationException, org.springframework.security.core.AuthenticationException;
+    JWTAuthResponse login(LoginDTO loginDTO) throws AuthenticationException, org.springframework.security.core.AuthenticationException;
+
     JWTAuthResponse loginGG(LoginGGDTO loginGGDTO) throws AuthenticationException, org.springframework.security.core.AuthenticationException;
-    String register(SignUpDTO signUpDTO) throws AuthenticationException;
+
+    JWTAuthResponse register(SignUpDTO signUpDTO) throws AuthenticationException;
 }

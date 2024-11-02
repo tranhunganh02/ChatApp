@@ -50,11 +50,12 @@ public class AuthServiceImpl implements AuthService {
         JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
         jwtAuthResponse.setAccessToken(token);
         jwtAuthResponse.setUserId(user.getId());
+        jwtAuthResponse.setAvatar(user.getAvatar());
         return jwtAuthResponse;
     }
 
     @Override
-    public String register(SignUpDTO signUpDTO) throws AuthenticationException {
+    public JWTAuthResponse register(SignUpDTO signUpDTO) throws AuthenticationException {
         if (userRepository.existsByEmail(signUpDTO.getEmail())) {
             throw new AuthenticationException("Email đã tồn tại!");
         }
@@ -71,7 +72,11 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String token = jwtTokenProvider.generateToken(authentication);
-        return token;
+        JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
+        jwtAuthResponse.setAccessToken(token);
+        jwtAuthResponse.setUserId(user.getId());
+        jwtAuthResponse.setAvatar(user.getAvatar());
+        return jwtAuthResponse;
     }
 
     @Override

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,8 +23,18 @@ public class MessageResponse {
     private Message.MessageType type;
     private String content;
     private LocalDateTime timestamp;
+    private List<FileResponse> fileResponses;
+    private CallResponse callResponse;
 
     public MessageResponse fromMessage(Message message) {
-        return new MessageResponse(message.getId(), message.getSender().getId(), message.getChat().getId(), message.getType(), message.getContent(), message.getCreatedAt());
+        MessageResponse messageResponse = new MessageResponse();
+
+        messageResponse.setId(message.getId());
+        messageResponse.setSenderId(message.getSender().getId());
+        messageResponse.setChatId(message.getChat().getId());
+        messageResponse.setType(message.getType());
+        messageResponse.setTimestamp(message.getCreatedAt());
+
+        return messageResponse;
     }
 }
