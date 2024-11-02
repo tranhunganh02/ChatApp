@@ -104,17 +104,21 @@ const ChatList = (props: ChatListProps) => {
   const renderChatItem = ({ item }: { item: Chat }) => {
     let chatImage;
     let userName;
+    let userId;
 
-    if (item.isGroup) {
-      chatImage = item.chatImage; // Sử dụng chatImage cho nhóm
-      userName = item.user.name; // Giả sử bạn lấy tên nhóm từ user
+    if (item.is_group) {
+      chatImage = item.chat_image; // Sử dụng chatImage cho nhóm
+      userName = item.name; // Giả sử bạn lấy tên nhóm từ user
+      userId = item.id
     } else {
       // Tìm user khác không phải là currentId trong members
-      const otherMember = item.members.find(member => member.id != currentId);
+      const otherMember = item.users.find(member => member.id != currentId);
       userName = otherMember?.name; // Lấy tên của user khác
+      chatImage = otherMember?.avatar
+      userId = otherMember?.id
     }
     return (
-      <Link href={{ pathname: "/message/[id]", params: { id: item.id, username: userName, image: chatImage } }}>
+      <Link href={{ pathname: "/message/[id]", params: { id: userId!, username: userName, image: chatImage } }}>
           <SectionComponent styles={styles.chatItem}>
             { 
             chatImage ? <Image source={{ uri: chatImage }} style={styles.chatImage} />
@@ -125,9 +129,10 @@ const ChatList = (props: ChatListProps) => {
             
               <View style={styles.chatDetails}>
                   <Text style={styles.userName}>{userName}</Text>
+                  <Text style={styles.messageContent}>{item.last_message.content}</Text>
                   {/* Thêm mã khác nếu cần */}
               </View>
-              <Text style={styles.messageTime}>{item.createdAt}</Text>
+              <Text style={styles.messageTime}>{item.last_message.timestamp}</Text>
           </SectionComponent>
       </Link>
   );

@@ -4,9 +4,19 @@ import { User } from "../user/user";
 
 export interface Chat {
   id: number;
-  isGroup: boolean;
-  chatImage: string | null;
+  name?: string;
+  is_group: boolean;
+  chat_image: string | null;
   createdAt: string;
-  user: User;
-  members: User[];
+  last_message: LastMessage;
+  users: User[];
+}
+
+export interface LastMessage {
+  id: number;
+  type: string;
+  content: string;
+  timestamp: string;
+  sender_id: number;
+  chat_id: number
 }

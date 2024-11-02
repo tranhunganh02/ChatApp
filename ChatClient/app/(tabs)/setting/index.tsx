@@ -23,7 +23,7 @@ const UserSetting = () => {
     // Xóa thông tin xác thực từ Redux
     dispatch(removeAuth());
     // Có thể điều hướng người dùng đến trang đăng nhập hoặc trang chính
-    router.replace("/auth/login"); // Nếu bạn sử dụng react-navigation hoặc expo-router
+    router.replace("/onboarding"); // Nếu bạn sử dụng react-navigation hoặc expo-router
   };
 
   const item = [

@@ -4,6 +4,10 @@ import { Validate } from "@/utils/validate";
 import { ButtonComponent, ContainerComponent, InputComponent, SectionComponent, SpaceComponent, TextComponent } from "@/components";
 import fontFamilies from "@/constants/fontFamilies";
 import authenticationAPI from "@/apis/authApi";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { useDispatch } from "react-redux";
+import { addAuth } from "@/state/reducers/authReducer";
 
 export default function SignUpScreen() {
   const [name, setName] = useState("");
@@ -12,6 +16,9 @@ export default function SignUpScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [emailError, setEmailError] = useState(false);
+
+  const router  =useRouter()
+  const dispatch = useDispatch();
 
   const handleEmailChange = (input: string) => {
     setEmail(input);
@@ -27,6 +34,7 @@ export default function SignUpScreen() {
       try {
         const res = await authenticationAPI.HandleAuthentication(
           'auth/register',
+          undefined,
           {name ,email, password},
           'post',
         );
