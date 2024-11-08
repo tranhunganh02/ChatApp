@@ -10,8 +10,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class SingleMessageSendDto {
-    @JsonProperty("recipient_id")
-    private Integer recipientId;
+public class GroupTextSendDTO {
+    @JsonProperty("chat_id")
+    private Integer chatId;
     private String content;
+    @JsonProperty("message_type")
+    private String messageType;
 }

@@ -31,12 +31,9 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<JWTAuthResponse> register(@RequestBody SignUpDTO signUpDTO) throws AuthenticationException {
-        String token = authService.register(signUpDTO);
+        JWTAuthResponse response = authService.register(signUpDTO);
 
-        JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
-        jwtAuthResponse.setAccessToken(token);
-
-        return ResponseEntity.ok(jwtAuthResponse);
+        return ResponseEntity.ok(response);
     }
 
 
