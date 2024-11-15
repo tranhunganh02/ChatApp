@@ -1,22 +1,35 @@
-import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React, { useState } from "react";
 import { Validate } from "@/utils/validate";
-import { ButtonComponent, ContainerComponent, IconButtonComponent, InputComponent, SectionComponent, SpaceComponent, TextComponent } from "@/components";
+import {
+  ButtonComponent,
+  ContainerComponent,
+  IconButtonComponent,
+  InputComponent,
+  SectionComponent,
+  SpaceComponent,
+  TextComponent,
+} from "@/components";
 import fontFamilies from "@/constants/fontFamilies";
 import { useRouter } from "expo-router";
 import { useDispatch } from "react-redux";
-import authenticationAPI from '../../apis/authApi'
-import { addAuth,AuthState } from "@/state/reducers/authReducer";
+import authenticationAPI from "../../apis/authApi";
+import { addAuth, AuthState } from "@/state/reducers/authReducer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function LoginScreen() {
-      
-  const router = useRouter();  
-  
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [emailError, setEmailError] = useState(false);
-
 
   const dispatch = useDispatch();
 
@@ -34,37 +47,36 @@ export default function LoginScreen() {
     if (emailValidation) {
       try {
         const res = await authenticationAPI.HandleAuthentication(
-          'auth/login',
+          "auth/login",
           undefined,
           { email, password },
-          'post'
+          "post"
         );
-    
-        console.log('API response:', res.data); // Log API response
-    
+
+        console.log("API response:", res.data); // Log API response
+
         if (res.data && res.data.accessToken) {
           const dataUser: AuthState = {
-            id: res.data.id, // Thêm id vào đây nếu cần
-            email: res.data.email,
+            userId: res.data.userId, // Thêm id vào đây nếu cần
+            avatar: res.data.avatar,
             accessToken: res.data.accessToken,
           };
-    
+
           console.log("Data user being dispatched:", dataUser); // Log data user
-    
+
           dispatch(addAuth(dataUser));
-          await AsyncStorage.setItem('auth', JSON.stringify(dataUser));
+          await AsyncStorage.setItem("auth", JSON.stringify(dataUser));
           router.replace("/(tabs)/message");
         } else {
           console.error("No access token received");
         }
       } catch (error) {
-        console.log('Login error:', error);
+        console.log("Login error:", error);
       }
     } else {
-      Alert.alert('Email is not correct!!!!');
+      Alert.alert("Email is not correct!!!!");
     }
   };
-
 
   return (
     <ContainerComponent isScroll back>
@@ -150,7 +162,7 @@ export default function LoginScreen() {
         />
         <InputComponent
           value={password}
-          onChange={val => setPassword(val)}
+          onChange={(val) => setPassword(val)}
           isPassword
           affix={<TextComponent text="Password" styles={styles.affixInput} />}
         />

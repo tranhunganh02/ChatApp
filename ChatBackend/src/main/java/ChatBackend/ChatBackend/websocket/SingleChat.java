@@ -35,7 +35,6 @@ public class SingleChat {
                 "/queue/messages",
                 message
         );
-
         return message;
     }
 

@@ -9,7 +9,6 @@ interface Props {
 }
 
 const UserList = (props: Props) => {
-
     const {userList} = props
 
   return (
@@ -17,12 +16,12 @@ const UserList = (props: Props) => {
      showsHorizontalScrollIndicator={false}
       data={userList}
       horizontal
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item.id.toString()}
       contentContainerStyle={{ paddingHorizontal: 0 }}
       renderItem={({ item }) => (
-        <Link  href={{ pathname: "/message/[id]", params: { id: item.id,  username: item.name, image: item.image }}}>
+        <Link  href={{ pathname: "/message/[id]", params: { id: item.id,  username: item.name, image: item.avatar }}}>
         <View style={styles.userContainer}>
-          <Image source={{ uri: item.image }} style={styles.userImage} />
+          <Image source={{ uri: item.avatar || require('@/assets/images/avatar_default.jpeg') }} style={styles.userImage} />
           <Text style={styles.userName}>{item.name}</Text>
         </View>
         </Link>

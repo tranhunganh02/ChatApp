@@ -1,9 +1,13 @@
 import { Timestamp } from "react-native-reanimated/lib/typescript/reanimated2/commonTypes";
 
-export interface Message {
-    senderId: number;
+interface Message {
+    id: number;
+    type: string;
     content: string;
-    time: string;
-    status: boolean;
+    timestamp: string;
+    fileResponses: any;
+    callResponse: any;
+    senderId: number;
+    chatId: number;
   }
-  
+

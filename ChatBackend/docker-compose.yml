@@ -1,0 +1,29 @@
+services:
+  db-mysql:
+    image: mysql:latest
+    container_name: db-mysql
+    restart: always
+    environment:
+      - MYSQL_DATABASE=chat_application
+      - MYSQL_ROOT_PASSWORD=12345
+      - MYSQL_USER=chatapp
+      - MYSQL_PASSWORD=12345
+    ports:
+      - "3306:3306"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tanh11704/chat-application:latest
+    container_name: chat-application-container
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db-mysql:3306/chat_application?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=chatapp
+      - SPRING_DATASOURCE_PASSWORD=12345
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    entrypoint: "/wait-for-it.sh db-mysql:3306 -- java -jar /phuocanh/linux-final/app.jar"
+    depends_on:
+      - db-mysql

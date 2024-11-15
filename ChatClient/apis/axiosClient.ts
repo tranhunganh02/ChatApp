@@ -1,16 +1,16 @@
-import axios from 'axios';
-import queryString from 'query-string';
-import { appInfo } from '../constants/appInfors';
+import axios from "axios";
+import queryString from "query-string";
+import { appInfo } from "../constants/appInfors";
 
 const axiosClient = axios.create({
   baseURL: appInfo.BASE_URL,
-  paramsSerializer: params => queryString.stringify(params),
+  paramsSerializer: (params) => queryString.stringify(params),
   //paramsSerializer được sử dụng để chuyển đổi các tham số thành chuỗi truy vấn bằng queryString.stringify.
 });
 
 axiosClient.interceptors.request.use(async (config: any) => {
   config.headers = {
-    Accept: 'application/json',
+    Accept: "application/json",
     ...config.headers,
   };
 
@@ -19,16 +19,16 @@ axiosClient.interceptors.request.use(async (config: any) => {
 });
 
 axiosClient.interceptors.response.use(
-  res => {
+  (res) => {
     if (res.data && res.status === 200) {
       return res;
     }
-    throw new Error('Error');
+    throw new Error("Error");
   },
-  error => {
+  (error) => {
     console.log(`Error api ${JSON.stringify(error)}`);
     throw new Error(error.response);
-  },
+  }
 );
 
 export default axiosClient;

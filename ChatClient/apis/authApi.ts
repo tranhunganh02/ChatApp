@@ -1,8 +1,8 @@
-import { appInfo } from '../constants/appInfors';
-import axiosClient from './axiosClient';
+import { appInfo } from "../constants/appInfors";
+import axiosClient from "./axiosClient";
 
 // Định nghĩa các phương thức HTTP
-type HttpMethod = 'get' | 'post' | 'put' | 'delete';
+type HttpMethod = "get" | "post" | "put" | "delete";
 
 // Định nghĩa kiểu cho cấu hình API
 interface AxiosRequestConfig {
@@ -19,10 +19,10 @@ class AuthAPI {
     url: string,
     accessToken?: string, // Thêm accessToken như tham số
     data?: any,
-    method?: HttpMethod,
+    method?: HttpMethod
   ) => {
     const config: AxiosRequestConfig = {
-      method: method ?? 'get',
+      method: method ?? "get",
       data,
       headers: {}, // Khởi tạo headers là một đối tượng rỗng
     };
@@ -38,7 +38,6 @@ class AuthAPI {
     return await axiosClient(`/${url}`, config);
   };
 }
-
 
 // Xuất AuthAPI
 const authenticationAPI = new AuthAPI();

@@ -1,90 +1,109 @@
 // messages.tsx
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { Link } from 'expo-router';
-import { CircleComponent, ContainerComponent, IconButtonComponent, RowComponent, SectionComponent, SpaceComponent, TextComponent, UserList } from '@/components';
-import { Ionicons } from '@expo/vector-icons';
-import { appColors } from '@/constants/appColor';
-import { LinearGradient } from 'expo-linear-gradient';
-import { appInfo } from '@/constants/appInfors';
-import { User, Chat } from '@/data';
-import { authSelector, AuthState } from '@/state/reducers/authReducer';
-import { useSelector } from 'react-redux';
-import authenticationAPI from '@/apis/authApi';
-import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Link } from "expo-router";
+import {
+  CircleComponent,
+  ContainerComponent,
+  IconButtonComponent,
+  RowComponent,
+  SectionComponent,
+  SpaceComponent,
+  TextComponent,
+  UserList,
+} from "@/components";
+import { Ionicons } from "@expo/vector-icons";
+import { appColors } from "@/constants/appColor";
+import { LinearGradient } from "expo-linear-gradient";
+import { appInfo } from "@/constants/appInfors";
+import { User, Chat } from "@/data";
+import { authSelector, AuthState } from "@/state/reducers/authReducer";
+import { useSelector } from "react-redux";
+import authenticationAPI from "@/apis/authApi";
+import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 
 const Messages = () => {
   const heightScreen = appInfo.sizes.HEIGHT;
 
   //const auth: AuthState = useSelector(authSelector);
   const [chatData, setChatData] = useState<Chat[]>([]);
-  const [currentUser, setCurrentUser] = useState<AuthState>()
-  const {getItem} = useAsyncStorage('auth')
-  const auth:AuthState = useSelector(authSelector);
+  const { getItem } = useAsyncStorage("auth");
+  const auth: AuthState = useSelector(authSelector);
 
-
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchChatData = async () => {
-      if (auth && auth.accessToken) {
+      if (auth?.accessToken) {
         try {
-          console.log(`AccessToken : ${auth.accessToken}`);
           const response = await authenticationAPI.HandleAuthentication(
-            'chats/user',
+            "chats/user",
             auth.accessToken,
             undefined,
             "get"
           );
           setChatData(response.data);
+          console.log(response.data);
         } catch (error) {
-          console.error('Error fetching chat data:', error);
+          console.error("Error fetching chat data:", error);
         } finally {
           setLoading(false);
         }
       } else {
-        console.error('No user data found');
+        console.error("No user data found");
         setLoading(false);
       }
     };
-  
+
     fetchChatData();
-  }, [auth]);  // Add auth as a dependency
-  
-  
+  }, [auth]);
 
-  return loading ? <>
-
-  
-  </> : (
+  return loading ? (
+    <></>
+  ) : (
     <ContainerComponent isImageBackground>
-      <SectionComponent styles={{
-        paddingHorizontal:0, height: heightScreen * 0.3, width: appInfo.sizes.WIDTH
-      }}>
-     
-          <SectionComponent styles={{ paddingTop: 12 }}>
-            <RowComponent justify='space-between'>
-              <IconButtonComponent icon={<Ionicons name='search-outline' size={30} color={"white"} />} colorButton={"#363a4d"} />
-              <TextComponent text='Home' title color='white' size={20} />
-              <Image
-                source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLe5PABjXc17cjIMOibECLM7ppDwMmiDg6Dw&s" }}
-                style={{ width: 50, height: 50, borderRadius: 25 }}
-              />
-            </RowComponent>
-          </SectionComponent>
-          <SpaceComponent height={40} />
-          {/* <SectionComponent>
+      <SectionComponent
+        styles={{
+          paddingHorizontal: 0,
+          height: heightScreen * 0.3,
+          width: appInfo.sizes.WIDTH,
+        }}
+      >
+        <SectionComponent styles={{ paddingTop: 12 }}>
+          <RowComponent justify="space-between">
+            <IconButtonComponent
+              icon={
+                <Ionicons name="search-outline" size={30} color={"white"} />
+              }
+              colorButton={"#363a4d"}
+            />
+            <TextComponent text="Home" title color="white" size={20} />
+            <Image
+              source={{
+                uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLe5PABjXc17cjIMOibECLM7ppDwMmiDg6Dw&s",
+              }}
+              style={{ width: 50, height: 50, borderRadius: 25 }}
+            />
+          </RowComponent>
+        </SectionComponent>
+        <SpaceComponent height={40} />
+        {/* <SectionComponent>
             <UserList userList={users} />
           </SectionComponent> */}
       </SectionComponent>
 
-      <View style={{
-        width: appInfo.sizes.WIDTH,
-        height: appInfo.sizes.HEIGHT * 0.68, paddingVertical: 24, borderTopLeftRadius: 24, // Bo góc bên trái phía trên
-        borderTopRightRadius: 24, backgroundColor: appColors.white,
-        bottom:20,
-        paddingHorizontal: 4
-      }}>
-        <ChatList chatList={chatData} currentId={auth.id}/>
+      <View
+        style={{
+          width: appInfo.sizes.WIDTH,
+          height: appInfo.sizes.HEIGHT * 0.68,
+          paddingVertical: 24,
+          borderTopLeftRadius: 24, // Bo góc bên trái phía trên
+          borderTopRightRadius: 24,
+          backgroundColor: appColors.white,
+          bottom: 20,
+          paddingHorizontal: 4,
+        }}
+      >
+        <ChatList chatList={chatData} currentId={auth.userId} />
       </View>
     </ContainerComponent>
   );
@@ -92,50 +111,61 @@ const Messages = () => {
 
 export default Messages;
 
-
 interface ChatListProps {
   chatList: Chat[];
-  currentId: String;
+  currentId: number;
 }
 
 const ChatList = (props: ChatListProps) => {
   const { chatList, currentId } = props;
 
   const renderChatItem = ({ item }: { item: Chat }) => {
-    let chatImage;
-    let userName;
-    let userId;
+    let chatImage = item.chat_image;
+    let userName = item.name;
+    let targetId = item.id;
 
-    if (item.is_group) {
-      chatImage = item.chat_image; // Sử dụng chatImage cho nhóm
-      userName = item.name; // Giả sử bạn lấy tên nhóm từ user
-      userId = item.id
-    } else {
-      // Tìm user khác không phải là currentId trong members
-      const otherMember = item.users.find(member => member.id != currentId);
-      userName = otherMember?.name; // Lấy tên của user khác
-      chatImage = otherMember?.avatar
-      userId = otherMember?.id
+    if (!item.is_group) {
+      const otherMember = item.users.find((member) => member.id !== currentId);
+      if (otherMember) {
+        userName = otherMember?.name ?? undefined;
+        chatImage = otherMember.avatar;
+        targetId = otherMember.id;
+      }
     }
-    return (
-      <Link href={{ pathname: "/message/[id]", params: { id: userId!, username: userName, image: chatImage } }}>
-          <SectionComponent styles={styles.chatItem}>
-            { 
-            chatImage ? <Image source={{ uri: chatImage }} style={styles.chatImage} />
-            :
-            <Image source={require('@/assets/images/avatar_default.jpeg')} style={styles.chatImage} />
 
-            }
-            
-              <View style={styles.chatDetails}>
-                  <Text style={styles.userName}>{userName}</Text>
-                  <Text style={styles.messageContent}>{item.last_message.content}</Text>
-                  {/* Thêm mã khác nếu cần */}
-              </View>
-              <Text style={styles.messageTime}>{item.last_message.timestamp}</Text>
-          </SectionComponent>
+    return (
+      <Link
+        href={{
+          pathname: "/message/[id]",
+          params: {
+            id: targetId!,
+            username: userName,
+            image: chatImage,
+            isGroup: item.is_group ? "true" : "false",
+          },
+        }}
+      >
+        <SectionComponent styles={styles.chatItem}>
+          {chatImage ? (
+            <Image source={{ uri: chatImage }} style={styles.chatImage} />
+          ) : (
+            <Image
+              source={require("@/assets/images/avatar_default.jpeg")}
+              style={styles.chatImage}
+            />
+          )}
+
+          <View style={styles.chatDetails}>
+            <Text style={styles.userName}>{userName}</Text>
+            <Text style={styles.messageContent}>
+              {item.last_message.content}
+            </Text>
+            {/* Thêm mã khác nếu cần */}
+          </View>
+          <Text style={styles.messageTime}>{item.last_message.timestamp}</Text>
+        </SectionComponent>
       </Link>
-  );
+    );
   };
 
   return (
@@ -153,10 +183,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   chatItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
-    width: "100%"
+    width: "100%",
   },
   chatImage: {
     width: 50,
@@ -168,14 +198,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userName: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   messageContent: {
-    color: 'gray',
+    color: "gray",
   },
   messageTime: {
     fontSize: 10,
-    color: 'gray',
+    color: "gray",
   },
   userOnline: {
     height: 10,
@@ -194,5 +224,5 @@ const styles = StyleSheet.create({
     bottom: 10,
     left: 55,
     backgroundColor: "gray",
-  }
+  },
 });

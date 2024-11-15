@@ -13,7 +13,7 @@ const ChatList = (props: ChatListProps) => {
   // Hàm render cho từng phần tử chat
   const renderChatItem = ({ item }: { item: Chat }) => {
     return (
-     <Text>{item.userName}</Text>
+     <Text>{item.name}</Text>
     );
   };
 
@@ -21,7 +21,7 @@ const ChatList = (props: ChatListProps) => {
     <FlatList
       style={{height:300, width:400}}
       data={chatList}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item.id.toString()}
       renderItem={renderChatItem}
       contentContainerStyle={styles.listContainer}
     />

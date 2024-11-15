@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 
 
 export default function OnBoardingMainPage() {
-  const router = useRouter(); 
+  const router = useRouter();
   return (
     <ContainerComponent
       isImageBackground={true}
@@ -67,7 +67,7 @@ export default function OnBoardingMainPage() {
         <ButtonComponent
           text="Sign up with email"
           type="primary"
-          onPress={() => router.push("/auth/signup")} 
+          onPress={() => router.push("/auth/signup")}
           styles={styles.emailButton}
           textStyles={styles.emailButtonText}
           color="#787E97"
@@ -102,14 +102,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 68,
     color: "#fff",
-    lineHeight: 78,
+    lineHeight: 68 * 1.2,
     marginBottom: 25,
   },
   subtitle: {
     fontSize: 16,
     color: "#fff",
     opacity: 0.5,
-    lineHeight: 26,
+    lineHeight: 16 * 1.6,
     marginBottom: 35,
   },
   socialContainer: {
@@ -118,7 +118,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     width: "60%",
-    marginHorizontal: "auto",
+    // marginHorizontal: "auto",
+    alignSelf: "center",
     marginBottom: 35,
   },
   socialButton: {
