@@ -3,34 +3,33 @@ import React from 'react'
 import { appColors } from '@/constants/appColor'; // Chỉnh lại đường dẫn appColor theo project của bạn
 import { Message } from '@/data';
 
-
-
 interface MessageItemComponentProps {
   message: Message;
   currentUserId: number;
 }
 
 export default function MessageItemComponent({ message, currentUserId }: MessageItemComponentProps) {
-  const isCurrentUser = message.senderId == currentUserId;
+  console.log('MessageItemComponent', message, currentUserId)
+  const isCurrentUser = message.sender_id == currentUserId;
 
   return (
     <View style={[
-      styles.messageContainer, 
+      styles.messageContainer,
       isCurrentUser ? styles.rightContainer : styles.leftContainer
     ]}>
       <View style={[
-        styles.messageBubble, 
+        styles.messageBubble,
         { backgroundColor: isCurrentUser ? appColors.primary : '#F2F7FB' }
       ]}>
         <Text style={[
-          styles.messageText, 
+          styles.messageText,
           { color: isCurrentUser ? '#FFFFFF' : '#000000' }
         ]}>
           {message.content}
         </Text>
       </View>
       <Text style={styles.timeText}>
-        {message.time}
+        {message.timestamp}
       </Text>
     </View>
   )
