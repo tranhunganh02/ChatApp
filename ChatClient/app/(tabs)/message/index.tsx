@@ -158,11 +158,11 @@ const ChatList = (props: ChatListProps) => {
           <View style={styles.chatDetails}>
             <Text style={styles.userName}>{userName}</Text>
             <Text style={styles.messageContent}>
-              {item.last_message.content}
+              {item.last_message?   item.last_message.content?? "Chưa có nội dung chat nào": "Chưa có nội dung chat nào"}
             </Text>
             {/* Thêm mã khác nếu cần */}
           </View>
-          <Text style={styles.messageTime}>{item.last_message.timestamp}</Text>
+          <Text style={styles.messageTime}>{item.last_message? item.last_message.timestamp?? "" : ""}</Text>
         </SectionComponent>
       </Link>
     );
