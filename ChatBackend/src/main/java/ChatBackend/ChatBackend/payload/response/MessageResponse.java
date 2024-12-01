@@ -30,6 +30,7 @@ public class MessageResponse {
         MessageResponse messageResponse = new MessageResponse();
 
         messageResponse.setId(message.getId());
+        messageResponse.setContent(message.getContent());
         messageResponse.setSenderId(message.getSender().getId());
         messageResponse.setChatId(message.getChat().getId());
         messageResponse.setType(message.getType());

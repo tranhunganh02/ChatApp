@@ -24,12 +24,14 @@ import {
 import { authSelector, AuthState } from "@/state/reducers/authReducer";
 import { AppDispatch } from "@/state/store";
 import webSocketService from "@/services/WebSocketService";
-import {appInfo} from "@/constants/appInfors";
+import { appInfo } from "@/constants/appInfors";
 
 export default function Page() {
   const { id, username, image, isGroup } = useLocalSearchParams();
   const recipientId = parseInt(id as string);
-  const isGroupBoolean = Array.isArray(isGroup) ? isGroup[0] === "true" : isGroup === "true";
+  const isGroupBoolean = Array.isArray(isGroup)
+    ? isGroup[0] === "true"
+    : isGroup === "true";
 
   const auth: AuthState = useSelector(authSelector);
 
@@ -53,13 +55,14 @@ export default function Page() {
 
   useEffect(() => {
     if (auth && auth.accessToken) {
-      webSocketService.connect(auth.accessToken)
-          .then(() => {
-            console.log("WebSocket connected successfully");
-          })
-          .catch((error) => {
-            console.error("Failed to connect WebSocket:", error);
-          });
+      webSocketService
+        .connect(auth.accessToken)
+        .then(() => {
+          console.log("WebSocket connected successfully");
+        })
+        .catch((error) => {
+          console.error("Failed to connect WebSocket:", error);
+        });
     }
 
     return () => {
@@ -71,7 +74,11 @@ export default function Page() {
 
   const sendMessage = () => {
     try {
-      webSocketService.sendTextMessage(recipientId, messageContent, isGroupBoolean);
+      webSocketService.sendTextMessage(
+        recipientId,
+        messageContent,
+        isGroupBoolean
+      );
       setMessageContent("");
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -121,9 +128,9 @@ export default function Page() {
       </SectionComponent>
 
       <SectionComponent
-        styles= {{
-          width: '100%',
-          height: appInfo.sizes.HEIGHT * 0.74
+        styles={{
+          width: "100%",
+          height: appInfo.sizes.HEIGHT * 0.74,
         }}
       >
         <FlatList
@@ -139,7 +146,11 @@ export default function Page() {
         />
       </SectionComponent>
 
-      <SendAndInputComponent messageContent={messageContent} setMessageContent={setMessageContent} sendMessage={sendMessage} />
+      <SendAndInputComponent
+        messageContent={messageContent}
+        setMessageContent={setMessageContent}
+        sendMessage={sendMessage}
+      />
     </ContainerComponent>
   );
 }
