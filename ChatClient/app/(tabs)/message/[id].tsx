@@ -1,5 +1,5 @@
 import { View, Text, Image, FlatList } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ContainerComponent,
@@ -24,18 +24,39 @@ import {
 import { authSelector, AuthState } from "@/state/reducers/authReducer";
 import { AppDispatch } from "@/state/store";
 import webSocketService from "@/services/WebSocketService";
-import {appInfo} from "@/constants/appInfors";
+import { appInfo } from "@/constants/appInfors";
 
 export default function Page() {
   const { id, username, image, isGroup } = useLocalSearchParams();
   const recipientId = parseInt(id as string);
-  const isGroupBoolean = Array.isArray(isGroup) ? isGroup[0] === "true" : isGroup === "true";
+  const isGroupBoolean = Array.isArray(isGroup)
+    ? isGroup[0] === "true"
+    : isGroup === "true";
 
   const auth: AuthState = useSelector(authSelector);
 
   const { messages, loading, error } = useSelector(selectMessages);
   const dispatch = useDispatch<AppDispatch>();
   const route = useRouter();
+
+  const flatListRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    if (auth && auth.accessToken) {
+      webSocketService
+        .connect(auth.accessToken)
+        .then(() => {
+          console.log("WebSocket connected successfully");
+        })
+        .catch((error) => {
+          console.error("Failed to connect WebSocket:", error);
+        });
+    }
+
+    return () => {
+      webSocketService.disconnect();
+    };
+  }, [auth]);
 
   useEffect(() => {
     if (auth && auth.accessToken) {
@@ -51,32 +72,25 @@ export default function Page() {
     };
   }, [dispatch, id, auth]);
 
-  useEffect(() => {
-    if (auth && auth.accessToken) {
-      webSocketService.connect(auth.accessToken)
-          .then(() => {
-            console.log("WebSocket connected successfully");
-          })
-          .catch((error) => {
-            console.error("Failed to connect WebSocket:", error);
-          });
-    }
-
-    return () => {
-      webSocketService.disconnect();
-    };
-  }, [auth]);
-
   const [messageContent, setMessageContent] = useState("");
 
-  const sendMessage = () => {
+  const sendTextMessage = () => {
     try {
-      webSocketService.sendTextMessage(recipientId, messageContent, isGroupBoolean);
+      webSocketService.sendTextMessage(
+        recipientId,
+        messageContent,
+        isGroupBoolean
+      );
       setMessageContent("");
+      flatListRef.current?.scrollToEnd({ animated: true });
     } catch (error) {
       console.error("Failed to send message:", error);
     }
   };
+
+  useEffect(() => {
+    flatListRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
 
   return (
     <ContainerComponent>
@@ -121,12 +135,13 @@ export default function Page() {
       </SectionComponent>
 
       <SectionComponent
-        styles= {{
-          width: '100%',
-          height: appInfo.sizes.HEIGHT * 0.74
+        styles={{
+          width: "100%",
+          height: appInfo.sizes.HEIGHT * 0.74,
         }}
       >
         <FlatList
+          ref={flatListRef}
           style={{
             paddingHorizontal: 16,
           }}
@@ -139,7 +154,11 @@ export default function Page() {
         />
       </SectionComponent>
 
-      <SendAndInputComponent messageContent={messageContent} setMessageContent={setMessageContent} sendMessage={sendMessage} />
+      <SendAndInputComponent
+        messageContent={messageContent}
+        setMessageContent={setMessageContent}
+        sendTextMessage={sendTextMessage}
+      />
     </ContainerComponent>
   );
 }

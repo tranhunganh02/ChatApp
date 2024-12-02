@@ -143,14 +143,30 @@ public class MessageServiceImpl implements MessageService {
         List<FileResponse> fileResponses = new ArrayList<>();
         for (MultipartFile file : files) {
             try {
-                String filePath = storeFile(file, UPLOAD_DIR);
-
                 File savedFile = new File();
+                String filePath;
+
+                String contentType = file.getContentType();
+                if (contentType != null) {
+                    if (contentType.startsWith("image/")) {
+                        savedFile.setFileType(File.FileType.IMAGE);
+                        filePath = storeFile(file, UPLOAD_DIR + "/images");
+                    } else if (contentType.startsWith("video/")) {
+                        savedFile.setFileType(File.FileType.VIDEO);
+                        filePath = storeFile(file, UPLOAD_DIR + "/videos");
+                    } else {
+                        savedFile.setFileType(File.FileType.DOCUMENT);
+                        filePath = storeFile(file, UPLOAD_DIR + "/files");
+                    }
+                } else {
+                    savedFile.setFileType(File.FileType.DOCUMENT);
+                    filePath = storeFile(file, UPLOAD_DIR + "/files");
+                }
+
                 savedFile.setFileUrl(filePath);
                 savedFile.setMessage(message);
                 savedFile.setFileName(file.getOriginalFilename());
                 savedFile.setFileSize(file.getSize());
-                savedFile.setFileType(File.FileType.DOCUMENT);
 
                 fileRepository.save(savedFile);
 
@@ -205,7 +221,25 @@ public class MessageServiceImpl implements MessageService {
         List<MessageResponse> responses = new ArrayList<>();
         for (Message message : messages) {
             MessageResponse response = new MessageResponse().fromMessage(message);
-            response.setContent(message.getContent());
+            switch (message.getType()) {
+                case TEXT -> {
+                    response.setContent(message.getContent());
+                }
+                case FILE -> {
+                    List<File> files = fileRepository.findByMessageId(message.getId());
+                    List<FileResponse> fileResponses = new ArrayList<>();
+                    for (File file : files) {
+                        FileResponse fileResponse = new FileResponse().fromFile(file);
+                        fileResponses.add(fileResponse);
+                    }
+                    response.setFileResponses(fileResponses);
+                }
+                case CALL -> {
+                    Call call = callRepository.findByMessageId(message.getId());
+                    CallResponse callResponse = new CallResponse().fromCall(call);
+                    response.setCallResponse(callResponse);
+                }
+            }
             responses.add(response);
         }
 
@@ -301,14 +335,30 @@ public class MessageServiceImpl implements MessageService {
         List<FileResponse> fileResponses = new ArrayList<>();
         for (MultipartFile file : files) {
             try {
-                String filePath = storeFile(file, UPLOAD_DIR);
-
                 File savedFile = new File();
+                String filePath;
+
+                String contentType = file.getContentType();
+                if (contentType != null) {
+                    if (contentType.startsWith("image/")) {
+                        savedFile.setFileType(File.FileType.IMAGE);
+                        filePath = storeFile(file, UPLOAD_DIR + "/images");
+                    } else if (contentType.startsWith("video/")) {
+                        savedFile.setFileType(File.FileType.VIDEO);
+                        filePath = storeFile(file, UPLOAD_DIR + "/videos");
+                    } else {
+                        savedFile.setFileType(File.FileType.DOCUMENT);
+                        filePath = storeFile(file, UPLOAD_DIR + "/files");
+                    }
+                } else {
+                    savedFile.setFileType(File.FileType.DOCUMENT);
+                    filePath = storeFile(file, UPLOAD_DIR + "/files");
+                }
+
                 savedFile.setFileUrl(filePath);
                 savedFile.setMessage(message);
                 savedFile.setFileName(file.getOriginalFilename());
                 savedFile.setFileSize(file.getSize());
-                savedFile.setFileType(File.FileType.DOCUMENT);
 
                 fileRepository.save(savedFile);
 

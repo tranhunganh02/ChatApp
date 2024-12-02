@@ -43,7 +43,7 @@ public class MessageController {
         return ResponseEntity.ok(messages);
     }
 
-    @PostMapping(value = "users/files/{chatId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "groups/files/{chatId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MessageResponse> sendGroupFileMessage(
             @PathVariable("chatId") Integer chatId,
             @RequestHeader("Authorization") String token,
