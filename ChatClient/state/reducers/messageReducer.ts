@@ -5,12 +5,16 @@ interface MessageState {
   messages: Message[];
   loading: boolean;
   error: string | null;
+  uploadLoading: boolean;
+  uploadError: string | null;
 }
 
 const initialState: MessageState = {
   messages: [],
   loading: false,
   error: null,
+  uploadLoading: false,
+  uploadError: null,
 };
 
 export const fetchMessages = createAsyncThunk(
@@ -26,6 +30,37 @@ export const fetchMessages = createAsyncThunk(
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Failed to fetch messages"
+      );
+    }
+  }
+);
+
+export const uploadFile = createAsyncThunk(
+  "messages/uploadFile",
+  async (
+    params: {
+      recipientId: number | null;
+      chatId: number | null;
+      token: string;
+      files: any[];
+      isGroup: boolean;
+    },
+    thunkAPI
+  ) => {
+    const { recipientId, chatId, token, files, isGroup } = params;
+
+    try {
+      const response = await messageAPI.uploadFile(
+        recipientId,
+        chatId,
+        token,
+        files,
+        isGroup
+      );
+      return response;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Lỗi khi tải file"
       );
     }
   }
@@ -63,6 +98,19 @@ const messageSlice = createSlice({
       .addCase(fetchMessages.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload;
+      });
+
+    builder
+      .addCase(uploadFile.pending, (state) => {
+        state.uploadLoading = true;
+        state.uploadError = null;
+      })
+      .addCase(uploadFile.fulfilled, (state, action) => {
+        state.uploadLoading = false;
+      })
+      .addCase(uploadFile.rejected, (state, action) => {
+        state.uploadLoading = false;
+        state.uploadError = action.payload as string;
       });
   },
 });

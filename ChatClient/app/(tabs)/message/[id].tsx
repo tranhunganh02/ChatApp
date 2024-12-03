@@ -1,4 +1,4 @@
-import { View, Text, Image, FlatList } from "react-native";
+import { View, Text, Image, FlatList, Alert } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -16,15 +16,18 @@ import fontFamilies from "@/constants/fontFamilies";
 import { globalStyles } from "@/styles/globalStyles";
 import SendAndInputComponent from "@/components/roomChat/SendAndInputComponent";
 import { useDispatch, useSelector } from "react-redux";
+import * as ImagePicker from "expo-image-picker";
 import {
   clearMessages,
   fetchMessages,
   selectMessages,
+  uploadFile,
 } from "@/state/reducers/messageReducer";
 import { authSelector, AuthState } from "@/state/reducers/authReducer";
 import { AppDispatch } from "@/state/store";
 import webSocketService from "@/services/WebSocketService";
 import { appInfo } from "@/constants/appInfors";
+import { Message } from "@/data";
 
 export default function Page() {
   const { id, username, image, isGroup } = useLocalSearchParams();
@@ -84,7 +87,41 @@ export default function Page() {
       setMessageContent("");
       flatListRef.current?.scrollToEnd({ animated: true });
     } catch (error) {
-      console.error("Failed to send message:", error);
+      console.error("Lỗi khi gửi tin nhắn:", error);
+    }
+  };
+
+  const handleFilePick = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      aspect: [4, 3],
+      quality: 1,
+      allowsMultipleSelection: true,
+    });
+
+    if (!result.canceled) {
+      if (result.assets.length > 0) {
+        try {
+          const response = await dispatch(
+            uploadFile({
+              recipientId: recipientId,
+              chatId: isGroup ? recipientId : null,
+              token: auth.accessToken,
+              files: result.assets,
+              isGroup: isGroupBoolean,
+            })
+          );
+
+          if (response.payload) {
+            webSocketService.sendFileMessage(response.payload);
+          }
+
+          flatListRef.current?.scrollToEnd({ animated: true });
+        } catch (error) {
+          console.error("Lỗi khi chọn file:", error);
+        }
+      }
     }
   };
 
@@ -158,6 +195,7 @@ export default function Page() {
         messageContent={messageContent}
         setMessageContent={setMessageContent}
         sendTextMessage={sendTextMessage}
+        onSendFile={handleFilePick}
       />
     </ContainerComponent>
   );

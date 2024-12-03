@@ -4,6 +4,7 @@ import { appColors } from "@/constants/appColor";
 import { Message, MessageType } from "@/data";
 import { Image } from "expo-image";
 import { appInfo } from "@/constants/appInfors";
+import { formatDate } from "@/utils/date";
 
 interface MessageItemComponentProps {
   message: Message;
@@ -17,7 +18,6 @@ export default function MessageItemComponent({
   message,
   currentUserId,
 }: MessageItemComponentProps) {
-  console.log("MessageItemComponent", message, currentUserId);
   const isCurrentUser = message.sender_id === currentUserId;
 
   const renderMessageContent = () => {
@@ -39,14 +39,14 @@ export default function MessageItemComponent({
           <>
             {message.fileResponses?.map((file: any, index: number) => {
               const isImage = file.file_url?.match(/\.(jpeg|jpg|gif|png)$/);
-              const fileUrl = `${appInfo.BASE_URL}/${file.file_url}`;
+              const fileName = `${file.file_url?.split("/").pop()}`;
 
               if (isImage) {
                 return (
                   <View key={index}>
                     <Image
                       style={styles.imagePreview}
-                      source={{ uri: fileUrl }} // Cung cấp đúng URL cho Image
+                      source={{ uri: `${appInfo.BASE_URL}images/${fileName}` }}
                       placeholder={{ blurhash }}
                       contentFit="cover"
                       transition={1000}
@@ -116,7 +116,7 @@ export default function MessageItemComponent({
       >
         {renderMessageContent()}
       </View>
-      <Text style={styles.timeText}>{message.timestamp}</Text>
+      <Text style={styles.timeText}>{formatDate(message.timestamp)}</Text>
     </View>
   );
 }

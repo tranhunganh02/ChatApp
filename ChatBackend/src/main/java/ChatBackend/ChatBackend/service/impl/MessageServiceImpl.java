@@ -42,7 +42,7 @@ public class MessageServiceImpl implements MessageService {
     @Autowired
     CallRepository callRepository;
 
-    private final String UPLOAD_DIR = "uploads/files";
+    private final String UPLOAD_DIR = "uploads";
 
     @Override
     public MessageResponse getMessageById(Integer id) {

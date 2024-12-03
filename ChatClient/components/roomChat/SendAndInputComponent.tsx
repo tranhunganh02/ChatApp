@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, Alert } from "react-native";
 import React, { useState } from "react";
 import { appInfo, getDeviceType } from "@/constants/appInfors";
 import IconButtonComponent from "../IconButtonComponent";
@@ -7,6 +7,7 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import RowComponent from "../RowComponent";
 import InputComponent from "../InputComponent";
 import SpaceComponent from "../SpaceComponent";
@@ -15,12 +16,14 @@ interface SendAndInputComponentProps {
   messageContent: string;
   setMessageContent: (content: string) => void;
   sendTextMessage: () => void;
+  onSendFile: () => void;
 }
 
 const SendAndInputComponent = ({
   messageContent,
   setMessageContent,
   sendTextMessage,
+  onSendFile,
 }: SendAndInputComponentProps) => {
   const height = appInfo.sizes.HEIGHT;
   const width = appInfo.sizes.WIDTH;
@@ -66,7 +69,9 @@ const SendAndInputComponent = ({
         />
         {/* <SpaceComponent width={20}/> */}
         <RowComponent>
-          <IconButtonComponent icon={<Ionicons name="image" size={22} />} />
+          <IconButtonComponent
+            icon={<Ionicons name="image" size={22} onPress={onSendFile} />}
+          />
           <SpaceComponent width={6} />
           <IconButtonComponent
             icon={<Ionicons name="send-sharp" size={22} />}

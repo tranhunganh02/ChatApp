@@ -81,6 +81,27 @@ class WebSocketService {
     }
   }
 
+  sendFileMessage(messageResponse: Message) {
+    if (this.stompClient && this.stompClient.active) {
+      const destination = "/app/sendFileMessage";
+
+      try {
+        this.stompClient.publish({
+          destination: destination,
+          body: JSON.stringify(messageResponse),
+        });
+      } catch (error) {
+        console.error("Lỗi khi gửi tin nhắn:", error);
+        Alert.alert(
+          "Lỗi gửi tin nhắn",
+          "Không thể gửi tin nhắn. Vui lòng thử lại."
+        );
+      }
+    } else {
+      Alert.alert("Lỗi kết nối", "Không thể gửi tin nhắn. Vui lòng thử lại.");
+    }
+  }
+
   subscribeToMessages() {
     if (this.stompClient && this.stompClient.active) {
       console.log("Subscribing to messages...");
