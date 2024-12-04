@@ -50,6 +50,12 @@
         {
           "photosPermission": "Ứng dụng cần quyền truy cập vào ảnh của bạn"
         }
+      ],
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
+        }
       ]
     ],
     "experiments": {

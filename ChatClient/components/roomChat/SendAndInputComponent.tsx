@@ -16,6 +16,7 @@ interface SendAndInputComponentProps {
   messageContent: string;
   setMessageContent: (content: string) => void;
   sendTextMessage: () => void;
+  onSendImage: () => void;
   onSendFile: () => void;
 }
 
@@ -23,6 +24,7 @@ const SendAndInputComponent = ({
   messageContent,
   setMessageContent,
   sendTextMessage,
+  onSendImage,
   onSendFile,
 }: SendAndInputComponentProps) => {
   const height = appInfo.sizes.HEIGHT;
@@ -50,6 +52,7 @@ const SendAndInputComponent = ({
       <RowComponent justify="space-between">
         <IconButtonComponent
           icon={<MaterialCommunityIcons name="attachment" size={24} />}
+          onPress={onSendFile}
         />
         <InputComponent
           customStyle={{
@@ -70,7 +73,7 @@ const SendAndInputComponent = ({
         {/* <SpaceComponent width={20}/> */}
         <RowComponent>
           <IconButtonComponent
-            icon={<Ionicons name="image" size={22} onPress={onSendFile} />}
+            icon={<Ionicons name="image" size={22} onPress={onSendImage} />}
           />
           <SpaceComponent width={6} />
           <IconButtonComponent

@@ -17,7 +17,7 @@ class WebSocketService {
       this.disconnect();
     }
 
-    const socket = new SockJS("http://localhost:8080/ws");
+    const socket = new SockJS("http://192.168.0.113:8080/ws");
     this.stompClient = new Client({
       webSocketFactory: () => socket as any,
       connectHeaders: {
@@ -53,7 +53,7 @@ class WebSocketService {
   sendTextMessage(recipientId: number, content: string, isGroup: boolean) {
     if (this.stompClient && this.stompClient.active) {
       const destination = isGroup
-        ? "/app/group.sendTextMessage"
+        ? "/app/group.sendMessage"
         : "/app/user.sendTextMessage";
       const message = isGroup
         ? { chat_id: recipientId, content, message_type: "TEXT" }
@@ -64,20 +64,14 @@ class WebSocketService {
           destination: destination,
           body: JSON.stringify(message),
         });
-        console.log(`Message sent to ${destination}: ${content}`);
+        console.log(`Gửi tin nhắn đến ${destination}: ${content}`);
       } catch (error) {
-        console.error("Error sending message:", error);
-        Alert.alert(
-          "Message error",
-          "Failed to send the message. Please try again."
-        );
+        console.error("Lỗi gửi tin nhắn:", error);
+        Alert.alert("Lỗi", "Không thể gửi tin nhắn. Vui lòng thử lại.");
       }
     } else {
-      console.error("Not connected", "Please connect to WebSocket first");
-      Alert.alert(
-        "Connection error",
-        "Unable to send the message. Not connected to WebSocket."
-      );
+      console.error("Không có kết nối", "Vui lòng kêt nối WebSocket trước.");
+      Alert.alert("Lỗi kết nối", "Không thể gửi tin nhắn. Vui lòng thử lại.");
     }
   }
 

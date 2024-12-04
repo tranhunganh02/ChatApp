@@ -1,5 +1,6 @@
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 import axiosClient from "./axiosClient";
+import mime from "mime";
 import { appInfo } from "@/constants/appInfors";
 
 export interface Message {
@@ -32,7 +33,23 @@ class MessageAPI {
     return response.data;
   };
 
-  getMessagesByChatId = async (chatId: number, accessToken: string) => {};
+  getMessagesByChatId = async (
+    chatId: number,
+    accessToken: string
+  ): Promise<Message[]> => {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    };
+
+    const response = await axiosClient.get(
+      `/messages/groups/${chatId}`,
+      config
+    );
+
+    return response.data;
+  };
 
   uploadFile = async (
     recipientId: number | null,
@@ -45,7 +62,7 @@ class MessageAPI {
 
     const appendFilePromises = files.map(async (file) => {
       const uri = file.uri;
-      let name = file.fileName;
+      let name = file.fileName || file.name;
 
       try {
         const response = await fetch(uri);
@@ -53,7 +70,6 @@ class MessageAPI {
 
         formData.append("files", blob, name);
       } catch (error) {
-        console.error("Lỗi khi tải file:", error);
         Alert.alert("Lỗi", "Không thể tải file.");
         return;
       }
@@ -74,23 +90,22 @@ class MessageAPI {
         Alert.alert("Lỗi", "Chat ID không hợp lệ cho nhóm.");
         return;
       }
-      url = `${appInfo.BASE_URL}messages/groups/files/${chatId}`;
+      url = `/messages/groups/files/${chatId}`;
     } else {
       if (!recipientId) {
         Alert.alert("Lỗi", "Recipient ID không hợp lệ cho người dùng.");
         return;
       }
-      url = `${appInfo.BASE_URL}messages/users/files/${recipientId}`;
+      url = `/messages/users/files/${recipientId}`;
     }
 
     try {
       const response = await axiosClient.post(url, formData, config);
       return response.data;
-      return "response.data";
     } catch (error) {
       console.error("Lỗi khi tải file:", error);
       Alert.alert("Lỗi", "Không thể tải lên file.");
-      throw error;
+      return;
     }
   };
 }

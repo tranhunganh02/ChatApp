@@ -1,5 +1,5 @@
-import { View, Text, Image, FlatList } from "react-native";
-import React, { useEffect, useState } from "react";
+import { View, Text, Image, FlatList, Alert } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ContainerComponent,
@@ -16,20 +16,27 @@ import fontFamilies from "@/constants/fontFamilies";
 import { globalStyles } from "@/styles/globalStyles";
 import SendAndInputComponent from "@/components/roomChat/SendAndInputComponent";
 import { useDispatch, useSelector } from "react-redux";
+import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
 import {
   clearMessages,
-  fetchMessages,
+  fetchGroupMessages,
+  fetchSingleMessages,
   selectMessages,
+  uploadFile,
 } from "@/state/reducers/messageReducer";
 import { authSelector, AuthState } from "@/state/reducers/authReducer";
 import { AppDispatch } from "@/state/store";
 import webSocketService from "@/services/WebSocketService";
-import {appInfo} from "@/constants/appInfors";
+import { appInfo } from "@/constants/appInfors";
+import { Message } from "@/data";
 
 export default function Page() {
   const { id, username, image, isGroup } = useLocalSearchParams();
   const recipientId = parseInt(id as string);
-  const isGroupBoolean = Array.isArray(isGroup) ? isGroup[0] === "true" : isGroup === "true";
+  const isGroupBoolean = Array.isArray(isGroup)
+    ? isGroup[0] === "true"
+    : isGroup === "true";
 
   const auth: AuthState = useSelector(authSelector);
 
@@ -37,29 +44,18 @@ export default function Page() {
   const dispatch = useDispatch<AppDispatch>();
   const route = useRouter();
 
-  useEffect(() => {
-    if (auth && auth.accessToken) {
-      dispatch(
-        fetchMessages({
-          recipientId: parseInt(id as string),
-          accessToken: auth.accessToken,
-        })
-      );
-    }
-    return () => {
-      dispatch(clearMessages());
-    };
-  }, [dispatch, id, auth]);
+  const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     if (auth && auth.accessToken) {
-      webSocketService.connect(auth.accessToken)
-          .then(() => {
-            console.log("WebSocket connected successfully");
-          })
-          .catch((error) => {
-            console.error("Failed to connect WebSocket:", error);
-          });
+      webSocketService
+        .connect(auth.accessToken)
+        .then(() => {
+          console.log("WebSocket connected successfully");
+        })
+        .catch((error) => {
+          console.error("Failed to connect WebSocket:", error);
+        });
     }
 
     return () => {
@@ -67,16 +63,116 @@ export default function Page() {
     };
   }, [auth]);
 
+  useEffect(() => {
+    if (auth && auth.accessToken) {
+      console.log(isGroupBoolean);
+      isGroupBoolean === true
+        ? dispatch(
+            fetchGroupMessages({
+              chatId: parseInt(id as string),
+              accessToken: auth.accessToken,
+            })
+          )
+        : dispatch(
+            fetchSingleMessages({
+              recipientId: parseInt(id as string),
+              accessToken: auth.accessToken,
+            })
+          );
+    }
+    return () => {
+      dispatch(clearMessages());
+    };
+  }, [dispatch, id, auth]);
+
   const [messageContent, setMessageContent] = useState("");
 
-  const sendMessage = () => {
+  const sendTextMessage = () => {
     try {
-      webSocketService.sendTextMessage(recipientId, messageContent, isGroupBoolean);
+      webSocketService.sendTextMessage(
+        recipientId,
+        messageContent,
+        isGroupBoolean
+      );
       setMessageContent("");
+      flatListRef.current?.scrollToEnd({ animated: true });
     } catch (error) {
-      console.error("Failed to send message:", error);
+      console.error("Lỗi khi gửi tin nhắn:", error);
     }
   };
+
+  const handleImagePick = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      aspect: [4, 3],
+      quality: 1,
+      allowsMultipleSelection: true,
+    });
+
+    if (!result.canceled) {
+      if (result.assets.length > 0) {
+        try {
+          const response = await dispatch(
+            uploadFile({
+              recipientId: recipientId,
+              chatId: isGroup ? recipientId : null,
+              token: auth.accessToken,
+              files: result.assets,
+              isGroup: isGroupBoolean,
+            })
+          );
+
+          if (response.payload) {
+            webSocketService.sendFileMessage(response.payload);
+          }
+
+          flatListRef.current?.scrollToEnd({ animated: true });
+        } catch (error) {
+          console.error("Lỗi khi chọn file:", error);
+        }
+      }
+    }
+  };
+
+  const handleFilePick = async () => {
+    try {
+      let result = await DocumentPicker.getDocumentAsync({
+        type: "*/*",
+        multiple: true,
+      });
+
+      if (!result.canceled) {
+        if (result.assets && result.assets.length > 0) {
+          try {
+            const response = await dispatch(
+              uploadFile({
+                recipientId: recipientId,
+                chatId: isGroup ? recipientId : null,
+                token: auth.accessToken,
+                files: result.assets,
+                isGroup: isGroupBoolean,
+              })
+            );
+
+            if (response.payload) {
+              webSocketService.sendFileMessage(response.payload);
+            }
+
+            flatListRef.current?.scrollToEnd({ animated: true });
+          } catch (error) {
+            Alert.alert("Lỗi", "Không thể gửi file");
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Lỗi khi chọn file:", error);
+    }
+  };
+
+  useEffect(() => {
+    flatListRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
 
   return (
     <ContainerComponent>
@@ -121,12 +217,13 @@ export default function Page() {
       </SectionComponent>
 
       <SectionComponent
-        styles= {{
-          width: '100%',
-          height: appInfo.sizes.HEIGHT * 0.74
+        styles={{
+          width: "100%",
+          height: appInfo.sizes.HEIGHT * 0.74,
         }}
       >
         <FlatList
+          ref={flatListRef}
           style={{
             paddingHorizontal: 16,
           }}
@@ -139,7 +236,13 @@ export default function Page() {
         />
       </SectionComponent>
 
-      <SendAndInputComponent messageContent={messageContent} setMessageContent={setMessageContent} sendMessage={sendMessage} />
+      <SendAndInputComponent
+        messageContent={messageContent}
+        setMessageContent={setMessageContent}
+        sendTextMessage={sendTextMessage}
+        onSendImage={handleImagePick}
+        onSendFile={handleFilePick}
+      />
     </ContainerComponent>
   );
 }

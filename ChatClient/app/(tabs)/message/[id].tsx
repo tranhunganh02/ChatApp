@@ -17,9 +17,11 @@ import { globalStyles } from "@/styles/globalStyles";
 import SendAndInputComponent from "@/components/roomChat/SendAndInputComponent";
 import { useDispatch, useSelector } from "react-redux";
 import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
 import {
   clearMessages,
-  fetchMessages,
+  fetchGroupMessages,
+  fetchSingleMessages,
   selectMessages,
   uploadFile,
 } from "@/state/reducers/messageReducer";
@@ -63,12 +65,20 @@ export default function Page() {
 
   useEffect(() => {
     if (auth && auth.accessToken) {
-      dispatch(
-        fetchMessages({
-          recipientId: parseInt(id as string),
-          accessToken: auth.accessToken,
-        })
-      );
+      console.log(isGroupBoolean);
+      isGroupBoolean === true
+        ? dispatch(
+            fetchGroupMessages({
+              chatId: parseInt(id as string),
+              accessToken: auth.accessToken,
+            })
+          )
+        : dispatch(
+            fetchSingleMessages({
+              recipientId: parseInt(id as string),
+              accessToken: auth.accessToken,
+            })
+          );
     }
     return () => {
       dispatch(clearMessages());
@@ -91,7 +101,7 @@ export default function Page() {
     }
   };
 
-  const handleFilePick = async () => {
+  const handleImagePick = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
@@ -122,6 +132,41 @@ export default function Page() {
           console.error("Lỗi khi chọn file:", error);
         }
       }
+    }
+  };
+
+  const handleFilePick = async () => {
+    try {
+      let result = await DocumentPicker.getDocumentAsync({
+        type: "*/*",
+        multiple: true,
+      });
+
+      if (!result.canceled) {
+        if (result.assets && result.assets.length > 0) {
+          try {
+            const response = await dispatch(
+              uploadFile({
+                recipientId: recipientId,
+                chatId: isGroup ? recipientId : null,
+                token: auth.accessToken,
+                files: result.assets,
+                isGroup: isGroupBoolean,
+              })
+            );
+
+            if (response.payload) {
+              webSocketService.sendFileMessage(response.payload);
+            }
+
+            flatListRef.current?.scrollToEnd({ animated: true });
+          } catch (error) {
+            Alert.alert("Lỗi", "Không thể gửi file");
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Lỗi khi chọn file:", error);
     }
   };
 
@@ -195,6 +240,7 @@ export default function Page() {
         messageContent={messageContent}
         setMessageContent={setMessageContent}
         sendTextMessage={sendTextMessage}
+        onSendImage={handleImagePick}
         onSendFile={handleFilePick}
       />
     </ContainerComponent>
