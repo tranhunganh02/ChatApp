@@ -101,39 +101,73 @@ export default function Page() {
     }
   };
 
+  // const handleImagePick = async () => {
+  //   let result = await ImagePicker.launchImageLibraryAsync({
+  //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //     allowsEditing: false,
+  //     aspect: [4, 3],
+  //     quality: 1,
+  //     allowsMultipleSelection: true,
+  //   });
+
+  //   if (!result.canceled) {
+  //     if (result.assets.length > 0) {
+  //       try {
+  //         const response = await dispatch(
+  //           uploadFile({
+  //             recipientId: recipientId,
+  //             chatId: isGroup ? recipientId : null,
+  //             accessToken: auth.accessToken,
+  //             files: result.assets,
+  //             isGroup: isGroupBoolean,
+  //           })
+  //         );
+
+  //         if (response.payload) {
+  //           webSocketService.sendFileMessage(response.payload);
+  //         }
+
+  //         flatListRef.current?.scrollToEnd({ animated: true });
+  //       } catch (error) {
+  //         console.error("Lỗi khi chọn file:", error);
+  //       }
+  //     }
+  //   }
+  // };
+
   const handleImagePick = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
       aspect: [4, 3],
       quality: 1,
-      allowsMultipleSelection: true,
+      allowsMultipleSelection: false, // Không cho chọn nhiều ảnh
     });
-
-    if (!result.canceled) {
-      if (result.assets.length > 0) {
-        try {
-          const response = await dispatch(
-            uploadFile({
-              recipientId: recipientId,
-              chatId: isGroup ? recipientId : null,
-              token: auth.accessToken,
-              files: result.assets,
-              isGroup: isGroupBoolean,
-            })
-          );
-
-          if (response.payload) {
-            webSocketService.sendFileMessage(response.payload);
-          }
-
-          flatListRef.current?.scrollToEnd({ animated: true });
-        } catch (error) {
-          console.error("Lỗi khi chọn file:", error);
+  
+    if (!result.canceled && result.assets.length > 0) {
+      try {
+        const response = await dispatch(
+          uploadFile({
+            recipientId: recipientId,
+            chatId: isGroup ? recipientId : null,
+            accessToken: auth.accessToken,
+            files: result.assets, // Chỉ truyền một ảnh duy nhất
+            isGroup: isGroupBoolean,
+            fromMobile: true
+          })
+        );
+  
+        if (response.payload) {
+          webSocketService.sendFileMessage(response.payload);
         }
+  
+        flatListRef.current?.scrollToEnd({ animated: true });
+      } catch (error) {
+        console.error("Lỗi khi chọn file:", error);
       }
     }
   };
+  
 
   const handleFilePick = async () => {
     try {
@@ -149,9 +183,10 @@ export default function Page() {
               uploadFile({
                 recipientId: recipientId,
                 chatId: isGroup ? recipientId : null,
-                token: auth.accessToken,
+                accessToken: auth.accessToken,
                 files: result.assets,
                 isGroup: isGroupBoolean,
+                fromMobile: true
               })
             );
 
