@@ -65,7 +65,6 @@ export default function Page() {
 
   useEffect(() => {
     if (auth && auth.accessToken) {
-      console.log(isGroupBoolean);
       isGroupBoolean === true
         ? dispatch(
             fetchGroupMessages({

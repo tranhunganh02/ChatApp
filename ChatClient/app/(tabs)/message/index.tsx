@@ -16,47 +16,47 @@ import { Ionicons } from "@expo/vector-icons";
 import { appColors } from "@/constants/appColor";
 import { LinearGradient } from "expo-linear-gradient";
 import { appInfo } from "@/constants/appInfors";
-import { User, Chat } from "@/data";
+import { User, Chat, Message } from "@/data";
 import { authSelector, AuthState } from "@/state/reducers/authReducer";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import authenticationAPI from "@/apis/authApi";
 import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 import { formatDate } from "@/utils/date";
+import webSocketService from "@/services/WebSocketService";
+import { fetchChats, selectChats } from "@/state/reducers/chatReducer";
+import { AppDispatch } from "@/state/store";
 
 const Messages = () => {
   const heightScreen = appInfo.sizes.HEIGHT;
 
   //const auth: AuthState = useSelector(authSelector);
-  const [chatData, setChatData] = useState<Chat[]>([]);
+  const { chats, loading, error } = useSelector(selectChats);
   const { getItem } = useAsyncStorage("auth");
+  const dispatch = useDispatch<AppDispatch>();
   const auth: AuthState = useSelector(authSelector);
 
-  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    const fetchChatData = async () => {
-      if (auth?.accessToken) {
-        try {
-          const response = await authenticationAPI.HandleAuthentication(
-            "chats/user",
-            auth.accessToken,
-            undefined,
-            "get"
-          );
-          setChatData(response.data);
-          console.log(response.data);
-        } catch (error) {
-          console.error("Error fetching chat data:", error);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        console.error("No user data found");
-        setLoading(false);
-      }
-    };
+    if (auth && auth.accessToken) {
+      webSocketService
+        .connect(auth.accessToken)
+        .then(() => {
+          console.log("WebSocket connected successfully");
+        })
+        .catch((error) => {
+          console.error("Failed to connect WebSocket:", error);
+        });
+    }
 
-    fetchChatData();
+    return () => {
+      webSocketService.disconnect();
+    };
   }, [auth]);
+
+  useEffect(() => {
+    if (auth && auth.accessToken) {
+      dispatch(fetchChats(auth.accessToken));
+    }
+  }, [dispatch, auth]);
 
   return loading ? (
     <></>
@@ -104,7 +104,7 @@ const Messages = () => {
           paddingHorizontal: 4,
         }}
       >
-        <ChatList chatList={chatData} currentId={auth.userId} />
+        <ChatList chatList={chats} currentId={auth.userId} />
       </View>
     </ContainerComponent>
   );
@@ -245,3 +245,6 @@ const styles = StyleSheet.create({
     backgroundColor: "gray",
   },
 });
+function dispatch(arg0: any) {
+  throw new Error("Function not implemented.");
+}

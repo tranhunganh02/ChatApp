@@ -4,6 +4,7 @@ import { Client, Frame, IMessage } from "@stomp/stompjs";
 import { Message } from "@/apis/messageApi";
 import store from "@/state/store";
 import { addMessage } from "@/state/reducers/messageReducer";
+import { addChat, fetchChats } from "@/state/reducers/chatReducer";
 
 class WebSocketService {
   private stompClient: Client | null = null;
