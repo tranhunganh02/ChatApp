@@ -18,7 +18,7 @@ class WebSocketService {
       this.disconnect();
     }
 
-    const socket = new SockJS("http://192.168.0.113:8080/ws");
+    const socket = new SockJS("http://192.168.88.163:8080/ws");
     this.stompClient = new Client({
       webSocketFactory: () => socket as any,
       connectHeaders: {

@@ -59,30 +59,44 @@ export const uploadFile = createAsyncThunk(
     params: {
       recipientId: number | null;
       chatId: number | null;
-      token: string;
+      accessToken: string;
       files: any[];
       isGroup: boolean;
+      fromMobile: boolean;
     },
     thunkAPI
   ) => {
-    const { recipientId, chatId, token, files, isGroup } = params;
+    const { recipientId, chatId, accessToken, files, isGroup, fromMobile } = params;
 
     try {
-      const response = await messageAPI.uploadFile(
-        recipientId,
-        chatId,
-        token,
-        files,
-        isGroup
-      );
-      return response;
+
+      if(fromMobile) {
+        const response = await messageAPI.uploadFileMobile(
+          recipientId,
+          chatId,
+          accessToken,
+          files,
+          isGroup
+        );
+        return response;
+      }else {
+        const response = await messageAPI.uploadFile(
+          recipientId,
+          chatId,
+          accessToken,
+          files,
+          isGroup
+        );
+        return response;
+      }
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Lỗi khi tải file"
+        error.response?.data?.message || `Lỗi khi tải file:  ${JSON.stringify(error.message)}`
       );
     }
   }
 );
+
 
 const messageSlice = createSlice({
   name: "messages",

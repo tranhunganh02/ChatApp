@@ -123,7 +123,6 @@ export default function Page() {
             })
           );
 
-          console.log(response.payload);
           if (response.payload) {
             webSocketService.sendFileMessage(response.payload);
           }

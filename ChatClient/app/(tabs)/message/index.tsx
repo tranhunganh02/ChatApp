@@ -158,7 +158,7 @@ const ChatList = (props: ChatListProps) => {
 
           <View style={styles.chatDetails}>
             <Text style={styles.userName}>{userName}</Text>
-            {(() => {
+            {item.last_message ? (() => {
               switch (item.last_message.type) {
                 case "TEXT":
                   return (
@@ -175,7 +175,7 @@ const ChatList = (props: ChatListProps) => {
                     <Text style={styles.messageContent}>"Một Cuộc Gọi"</Text>
                   );
               }
-            })()}
+            })():  <Text style={styles.messageContent}> Ch co</Text>}
           </View>
           <Text style={styles.messageTime}>
             {item.last_message

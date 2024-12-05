@@ -116,9 +116,10 @@ export default function Page() {
             uploadFile({
               recipientId: recipientId,
               chatId: isGroup ? recipientId : null,
-              token: auth.accessToken,
+              accessToken: auth.accessToken,
               files: result.assets,
               isGroup: isGroupBoolean,
+              fromMobile: false 
             })
           );
 
@@ -148,9 +149,10 @@ export default function Page() {
               uploadFile({
                 recipientId: recipientId,
                 chatId: isGroup ? recipientId : null,
-                token: auth.accessToken,
+                accessToken: auth.accessToken,
                 files: result.assets,
                 isGroup: isGroupBoolean,
+                fromMobile: false
               })
             );
 
