@@ -12,13 +12,13 @@ class WebSocketService {
 
   async connect(token: string): Promise<void> {
     this.token = token;
-    console.log("Attempting to connect with token:", this.token);
 
     if (this.stompClient && this.stompClient.active) {
-      this.disconnect();
+      // this.disconnect();
+      return;
     }
 
-    const socket = new SockJS("http://192.168.88.163:8080/ws");
+    const socket = new SockJS("http://192.168.1.15:8080/ws");
     this.stompClient = new Client({
       webSocketFactory: () => socket as any,
       connectHeaders: {
@@ -28,10 +28,9 @@ class WebSocketService {
       onConnect: (frame: Frame) => {
         console.log(`Connected by token ${this.token}: `, frame);
         this.subscribeToMessages();
+        this.subscribeToChats(this.token!);
       },
       onStompError: (frame: Frame) => {
-        console.error("Broker reported error: " + frame.headers["message"]);
-        console.error("Additional details: " + frame.body);
         Alert.alert("Connection error", "Unable to connect to WebSocket");
 
         // Optional: Retry connection after a delay
@@ -45,9 +44,8 @@ class WebSocketService {
   disconnect() {
     if (this.stompClient) {
       this.stompClient.deactivate();
-      console.log("Disconnected from WebSocket");
     } else {
-      console.log("No active WebSocket connection to disconnect");
+      Alert.alert("Lỗi", "Không thể ngắt kết nối WebSocket.");
     }
   }
 
@@ -117,6 +115,18 @@ class WebSocketService {
         console.log("Received message from /user/queue/reply:", message.body);
         const parsedMessage: Message = JSON.parse(message.body);
         store.dispatch(addMessage(parsedMessage));
+      });
+    } else {
+      console.error("Cannot subscribe: WebSocket connection is not active");
+    }
+  }
+
+  subscribeToChats(token: string) {
+    if (this.stompClient && this.stompClient.active) {
+      console.log("Subscribing to messages...");
+
+      this.stompClient.subscribe("/user/queue/messages", () => {
+        store.dispatch(fetchChats(token));
       });
     } else {
       console.error("Cannot subscribe: WebSocket connection is not active");

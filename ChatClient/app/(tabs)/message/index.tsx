@@ -46,17 +46,13 @@ const Messages = () => {
           console.error("Failed to connect WebSocket:", error);
         });
     }
-
-    return () => {
-      webSocketService.disconnect();
-    };
-  }, [auth]);
+  }, []);
 
   useEffect(() => {
     if (auth && auth.accessToken) {
       dispatch(fetchChats(auth.accessToken));
     }
-  }, [dispatch, auth]);
+  }, []);
 
   return loading ? (
     <></>
@@ -158,24 +154,28 @@ const ChatList = (props: ChatListProps) => {
 
           <View style={styles.chatDetails}>
             <Text style={styles.userName}>{userName}</Text>
-            {item.last_message ? (() => {
-              switch (item.last_message.type) {
-                case "TEXT":
-                  return (
-                    <Text style={styles.messageContent}>
-                      {item.last_message.content}
-                    </Text>
-                  );
-                case "IMAGE":
-                  return (
-                    <Text style={styles.messageContent}>"Một Tệp Tin"</Text>
-                  );
-                case "CALL":
-                  return (
-                    <Text style={styles.messageContent}>"Một Cuộc Gọi"</Text>
-                  );
-              }
-            })():  <Text style={styles.messageContent}> Ch co</Text>}
+            {item.last_message ? (
+              (() => {
+                switch (item.last_message.type) {
+                  case "TEXT":
+                    return (
+                      <Text style={styles.messageContent}>
+                        {item.last_message.content}
+                      </Text>
+                    );
+                  case "IMAGE":
+                    return (
+                      <Text style={styles.messageContent}>"Một Tệp Tin"</Text>
+                    );
+                  case "CALL":
+                    return (
+                      <Text style={styles.messageContent}>"Một Cuộc Gọi"</Text>
+                    );
+                }
+              })()
+            ) : (
+              <Text style={styles.messageContent}> Ch co</Text>
+            )}
           </View>
           <Text style={styles.messageTime}>
             {item.last_message

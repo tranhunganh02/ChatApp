@@ -53,11 +53,16 @@ const chatSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchChats.pending, (state) => {
-        state.loading = true;
+        state.loading = false;
         state.error = null;
       })
       .addCase(fetchChats.fulfilled, (state, action: PayloadAction<Chat[]>) => {
         state.loading = false;
+        action.payload.sort((a, b) => {
+          const timestampA = new Date(a.last_message.timestamp).getTime();
+          const timestampB = new Date(b.last_message.timestamp).getTime();
+          return timestampB - timestampA;
+        });
         state.chats = action.payload;
       })
       .addCase(fetchChats.rejected, (state, action: PayloadAction<any>) => {

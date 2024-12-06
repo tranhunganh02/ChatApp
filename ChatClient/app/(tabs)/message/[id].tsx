@@ -119,7 +119,7 @@ export default function Page() {
               accessToken: auth.accessToken,
               files: result.assets,
               isGroup: isGroupBoolean,
-              fromMobile: false 
+              fromMobile: false,
             })
           );
 
@@ -152,7 +152,7 @@ export default function Page() {
                 accessToken: auth.accessToken,
                 files: result.assets,
                 isGroup: isGroupBoolean,
-                fromMobile: false
+                fromMobile: false,
               })
             );
 
