@@ -35,3 +35,9 @@ build/
 
 ### application.properties ###
 !**/src/main/resources/application.properties
+
+### Docker ###
+Dockerfile
+docker-compose.yml
+run.sh
+wait-for-it.sh

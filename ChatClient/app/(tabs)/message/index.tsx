@@ -21,6 +21,7 @@ import { authSelector, AuthState } from "@/state/reducers/authReducer";
 import { useSelector } from "react-redux";
 import authenticationAPI from "@/apis/authApi";
 import { useAsyncStorage } from "@react-native-async-storage/async-storage";
+import { formatDate } from "@/utils/date";
 
 const Messages = () => {
   const heightScreen = appInfo.sizes.HEIGHT;
@@ -157,12 +158,34 @@ const ChatList = (props: ChatListProps) => {
 
           <View style={styles.chatDetails}>
             <Text style={styles.userName}>{userName}</Text>
-            <Text style={styles.messageContent}>
-              {item.last_message.content}
-            </Text>
-            {/* Thêm mã khác nếu cần */}
+            {(() => {
+              switch (item.last_message.type) {
+                case "TEXT":
+                  return (
+                    <Text style={styles.messageContent}>
+                      {item.last_message.content}
+                    </Text>
+                  );
+                case "FILE":
+                  <Text style={styles.messageContent}>
+                    {currentId === item.last_message.sender_id
+                      ? "Bạn đã gửi một tệp"
+                      : userName + " đã gửi một tệp"}{" "}
+                  </Text>;
+                default:
+                  return (
+                    <Text style={styles.messageContent}>
+                      Loại tin nhắn khác
+                    </Text>
+                  );
+              }
+            })()}
           </View>
-          <Text style={styles.messageTime}>{item.last_message.timestamp}</Text>
+          <Text style={styles.messageTime}>
+            {item.last_message
+              ? formatDate(item.last_message.timestamp) ?? ""
+              : ""}
+          </Text>
         </SectionComponent>
       </Link>
     );
