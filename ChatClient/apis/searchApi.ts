@@ -3,7 +3,7 @@ import axiosClient from "./axiosClient";
 
 export interface UserSearch {
     id: number,
-    username: string,
+    name: string,
     email: string,
     avatar: string,
 }
