@@ -5,16 +5,20 @@ interface MessageState {
   messages: Message[];
   loading: boolean;
   error: string | null;
+  uploadLoading: boolean;
+  uploadError: string | null;
 }
 
 const initialState: MessageState = {
   messages: [],
   loading: false,
   error: null,
+  uploadLoading: false,
+  uploadError: null,
 };
 
-export const fetchMessages = createAsyncThunk(
-  "messages/fetchMessages",
+export const fetchSingleMessages = createAsyncThunk(
+  "messages/fetchSingleMessages",
   async (params: { recipientId: number; accessToken: string }, thunkAPI) => {
     const { recipientId, accessToken } = params;
     try {
@@ -31,6 +35,69 @@ export const fetchMessages = createAsyncThunk(
   }
 );
 
+export const fetchGroupMessages = createAsyncThunk(
+  "messages/fetchGroupMessages",
+  async (params: { chatId: number; accessToken: string }, thunkAPI) => {
+    const { chatId, accessToken } = params;
+    try {
+      const response = await messageAPI.getMessagesByChatId(
+        chatId,
+        accessToken
+      );
+      return response;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Failed to fetch messages"
+      );
+    }
+  }
+);
+
+export const uploadFile = createAsyncThunk(
+  "messages/uploadFile",
+  async (
+    params: {
+      recipientId: number | null;
+      chatId: number | null;
+      accessToken: string;
+      files: any[];
+      isGroup: boolean;
+      fromMobile: boolean;
+    },
+    thunkAPI
+  ) => {
+    const { recipientId, chatId, accessToken, files, isGroup, fromMobile } = params;
+
+    try {
+
+      if(fromMobile) {
+        const response = await messageAPI.uploadFileMobile(
+          recipientId,
+          chatId,
+          accessToken,
+          files,
+          isGroup
+        );
+        return response;
+      }else {
+        const response = await messageAPI.uploadFile(
+          recipientId,
+          chatId,
+          accessToken,
+          files,
+          isGroup
+        );
+        return response;
+      }
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || `Lỗi khi tải file:  ${JSON.stringify(error.message)}`
+      );
+    }
+  }
+);
+
+
 const messageSlice = createSlice({
   name: "messages",
   initialState,
@@ -45,12 +112,12 @@ const messageSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchMessages.pending, (state) => {
+      .addCase(fetchSingleMessages.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(
-        fetchMessages.fulfilled,
+        fetchSingleMessages.fulfilled,
         (state, action: PayloadAction<Message[]>) => {
           state.loading = false;
           const existingMessageIds = new Set(state.messages.map((m) => m.id));
@@ -60,9 +127,49 @@ const messageSlice = createSlice({
           ];
         }
       )
-      .addCase(fetchMessages.rejected, (state, action: PayloadAction<any>) => {
-        state.loading = false;
-        state.error = action.payload;
+      .addCase(
+        fetchSingleMessages.rejected,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          state.error = action.payload;
+        }
+      );
+
+    builder
+      .addCase(fetchGroupMessages.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        fetchGroupMessages.fulfilled,
+        (state, action: PayloadAction<Message[]>) => {
+          state.loading = false;
+          const existingMessageIds = new Set(state.messages.map((m) => m.id));
+          state.messages = [
+            ...state.messages,
+            ...action.payload.filter((msg) => !existingMessageIds.has(msg.id)),
+          ];
+        }
+      )
+      .addCase(
+        fetchGroupMessages.rejected,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          state.error = action.payload;
+        }
+      );
+
+    builder
+      .addCase(uploadFile.pending, (state) => {
+        state.uploadLoading = true;
+        state.uploadError = null;
+      })
+      .addCase(uploadFile.fulfilled, (state, action) => {
+        state.uploadLoading = false;
+      })
+      .addCase(uploadFile.rejected, (state, action) => {
+        state.uploadLoading = false;
+        state.uploadError = action.payload as string;
       });
   },
 });

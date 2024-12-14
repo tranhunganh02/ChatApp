@@ -54,26 +54,23 @@
 
 // export default CallListener;
 
-
 // components/CallListener.tsx
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import webSocketService from '@/services/WebSocketService';
-import { authSelector, AuthState } from '@/state/reducers/authReducer';
+import webSocketService from "@/services/WebSocketService";
+import { authSelector, AuthState } from "@/state/reducers/authReducer";
 
 const CallListener = () => {
-  const auth:AuthState = useSelector(authSelector);
+  const auth: AuthState = useSelector(authSelector);
 
   useEffect(() => {
     const connectWebSocket = async () => {
       if (auth && auth.accessToken) {
         try {
-
-          
           await webSocketService.connect(auth.accessToken);
-          console.log('WebSocket connected successfully', auth.accessToken);
+          console.log("WebSocket connected successfully", auth.accessToken);
         } catch (error) {
-          console.error('Failed to connect WebSocket:', error);
+          console.error("Failed to connect WebSocket:", error);
         }
       }
     };

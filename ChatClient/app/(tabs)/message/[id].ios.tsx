@@ -1,156 +1,173 @@
-import { View, Text, Image, FlatList } from "react-native";
-import React, { useEffect, useState } from "react";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import {
-  ContainerComponent,
-  IconButtonComponent,
-  MessageItemComponent,
-  RowComponent,
-  SectionComponent,
-  SpaceComponent,
-  TextComponent,
-} from "@/components";
-import { Ionicons } from "@expo/vector-icons";
-import { appColors } from "@/constants/appColor";
-import fontFamilies from "@/constants/fontFamilies";
-import { globalStyles } from "@/styles/globalStyles";
-import SendAndInputComponent from "@/components/roomChat/SendAndInputComponent";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  clearMessages,
-  fetchMessages,
-  selectMessages,
-} from "@/state/reducers/messageReducer";
-import { authSelector, AuthState } from "@/state/reducers/authReducer";
-import { AppDispatch } from "@/state/store";
-import webSocketService from "@/services/WebSocketService";
+import { Alert, Platform } from "react-native";
+import mime from "mime";
 import { appInfo } from "@/constants/appInfors";
-
-export default function Page() {
-  const { id, username, image, isGroup } = useLocalSearchParams();
-  const recipientId = parseInt(id as string);
-  const isGroupBoolean = Array.isArray(isGroup)
-    ? isGroup[0] === "true"
-    : isGroup === "true";
+import axiosClient from "@/apis/axiosClient";
 
   const auth: AuthState = useSelector(authSelector);
 
   const { messages, loading, error } = useSelector(selectMessages);
   const dispatch = useDispatch<AppDispatch>();
   const route = useRouter();
+export interface Message {
+  id: number;
+  type: string;
+  content: string | null;
+  timestamp: string;
+  fileResponses: any | null;
+  callResponse: any | null;
+  sender_id: number;
+  chat_id: number;
+}
 
-  useEffect(() => {
-    if (auth && auth.accessToken) {
-      dispatch(
-        fetchMessages({
-          recipientId: parseInt(id as string),
-          accessToken: auth.accessToken,
-        })
-      );
-    }
-    return () => {
-      dispatch(clearMessages());
+class MessageAPI {
+  getMessagesByRecipientId = async (
+    recipientId: number,
+    accessToken: string
+  ): Promise<Message[]> => {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     };
-  }, [dispatch, id, auth]);
 
-  useEffect(() => {
-    if (auth && auth.accessToken) {
-      webSocketService
-        .connect(auth.accessToken)
-        .then(() => {
-          console.log("WebSocket connected successfully");
-        })
-        .catch((error) => {
-          console.error("Failed to connect WebSocket:", error);
-        });
-    }
+    const response = await axiosClient.get(
+      `/messages/users/${recipientId}`,
+      config
+    );
 
     return () => {
       webSocketService.disconnect();
+    return response.data;
+  };
+
+  getMessagesByChatId = async (
+    chatId: number,
+    accessToken: string
+  ): Promise<Message[]> => {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     };
   }, [auth]);
 
   const [messageContent, setMessageContent] = useState("");
+    const response = await axiosClient.get(
+      `/messages/groups/${chatId}`,
+      config
+    );
 
-  const sendMessage = () => {
+    return response.data;
+  };
+
+  uploadFile = async (
+    recipientId: number | null,
+    chatId: number | null,
+    token: string,
+    files: any[],
+    isGroup: boolean
+  ) => {
+    const formData = new FormData();
+
+    const appendFilePromises = files.map(async (file) => {
+      const uri = file.uri;
+      let name = file.fileName || file.name;
+
+      try {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+
+        formData.append("files", blob, name);
+      } catch (error) {
+        Alert.alert("Lỗi", "Không thể tải file.");
+        return;
+      }
+    });
+
+    await Promise.all(appendFilePromises);
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    };
+
+    let url = "";
+    if (isGroup) {
+      if (!chatId) {
+        Alert.alert("Lỗi", "Chat ID không hợp lệ cho nhóm.");
+        return;
+      }
+      url = `/messages/groups/files/${chatId}`;
+    } else {
+      if (!recipientId) {
+        Alert.alert("Lỗi", "Recipient ID không hợp lệ cho người dùng.");
+        return;
+      }
+      url = `/messages/users/files/${recipientId}`;
+    }
+
     try {
-      webSocketService.sendTextMessage(
-        recipientId,
-        messageContent,
-        isGroupBoolean
-      );
-      setMessageContent("");
+      const response = await axiosClient.post(url, formData, config);
+      return response.data;
     } catch (error) {
-      console.error("Failed to send message:", error);
+      console.error("Lỗi khi tải file:", error);
+      Alert.alert("Lỗi", "Không thể tải lên file.");
+      return;
     }
   };
 
-  return (
-    <ContainerComponent>
-      <SectionComponent styles={[globalStyles.shadow, { width: "100%" }]}>
-        <RowComponent justify="space-between">
-          <IconButtonComponent
-            icon={<Ionicons name="arrow-back" size={22} />}
-            onPress={() => route.back()}
-          />
-          <RowComponent>
-            {image ? (
-              <Image
-                source={{ uri: image + "" }}
-                style={{ width: 50, height: 50, borderRadius: 25 }}
-              />
-            ) : (
-              <Image
-                source={require("@/assets/images/avatar_default.jpeg")}
-                style={{ width: 50, height: 50, borderRadius: 25 }}
-              />
-            )}
+  uploadFileMobile = async (
+    recipientId: number | null,
+    chatId: number | null,
+    token: string,
+    files: any[], // Mảng chứa một file duy nhất
+    isGroup: boolean
+  ) => {
+    const formData = new FormData();
 
-            <SectionComponent>
-              <TextComponent
-                text={username.toString()}
-                font={fontFamilies.acmeRegular.fontFamily}
-                size={24}
-              />
-              <TextComponent text={"active now"} color={appColors.gray} title />
-            </SectionComponent>
-          </RowComponent>
-          <SpaceComponent width={4} />
-          <RowComponent>
-            <IconButtonComponent
-              icon={<Ionicons name="call-outline" size={22} />}
-            />
-            <IconButtonComponent
-              icon={<Ionicons name="videocam-outline" size={24} />}
-            />
-          </RowComponent>
-        </RowComponent>
-      </SectionComponent>
+    // Chỉ gửi một ảnh duy nhất
+    files.forEach((file) => {
+      formData.append("files", {
+        uri: file.uri,
+        type: file.mimeType, // Đảm bảo type là mimeType
+        name: file.fileName || file.name,
+      } as any);
+    });
 
-      <SectionComponent
-        styles={{
-          width: "100%",
-          height: appInfo.sizes.HEIGHT * 0.74,
-        }}
-      >
-        <FlatList
-          style={{
-            paddingHorizontal: 16,
-          }}
-          data={messages}
-          renderItem={({ item }) => (
-            <MessageItemComponent message={item} currentUserId={auth.userId} />
-          )}
-          keyExtractor={(item) => item.id.toString()}
-          extraData={messages}
-        />
-      </SectionComponent>
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data", // Đảm bảo Content-Type là đúng
+      },
+    };
 
-      <SendAndInputComponent
-        messageContent={messageContent}
-        setMessageContent={setMessageContent}
-        sendMessage={sendMessage}
-      />
-    </ContainerComponent>
-  );
+    let url = "";
+    if (isGroup) {
+      if (!chatId) {
+        Alert.alert("Lỗi", "Chat ID không hợp lệ cho nhóm.");
+        return;
+      }
+      url = `/messages/groups/files/${chatId}`;
+    } else {
+      if (!recipientId) {
+        Alert.alert("Lỗi", "Recipient ID không hợp lệ cho người dùng.");
+        return;
+      }
+      url = `/messages/users/files/${recipientId}`;
+    }
+
+    try {
+      const response = await axiosClient.post(url, formData, config);
+      return response.data;
+    } catch (error) {
+      console.error("Lỗi khi tải file:", error);
+      Alert.alert("Lỗi", "Không thể tải lên file.");
+      return;
+    }
+  };
 }
+
+const messageAPI = new MessageAPI();
+export default messageAPI;

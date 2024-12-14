@@ -40,6 +40,7 @@ public class SpringSecurityConfig {
                 .authorizeHttpRequests((authorize) -> {
                     authorize.requestMatchers("/api/v1/auth/**").permitAll();
                     authorize.requestMatchers("/ws/**").permitAll();
+                    authorize.requestMatchers("/api/v1/images/**", "/api/v1/files/**", "/api/v1/videos/").permitAll();
                     authorize.anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
