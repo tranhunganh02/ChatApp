@@ -1,11 +1,14 @@
 package ChatBackend.ChatBackend.service.impl;
 
+import ChatBackend.ChatBackend.entity.User;
+import ChatBackend.ChatBackend.payload.response.UserResponse;
 import ChatBackend.ChatBackend.repository.ChatRepository;
 import ChatBackend.ChatBackend.repository.UserRepository;
 import ChatBackend.ChatBackend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,5 +23,23 @@ public class UserServiceImpl implements UserService {
     public List<String> findRecipientEmails(Integer chatId, String senderEmail) {
         List<String> recipientEmails = chatRepository.findRecipientEmailsByChatIdAndSenderEmail(chatId, senderEmail);
         return recipientEmails;
+    }
+
+    @Override
+    public List<UserResponse> searchUsersByName(String name) {
+        String query = "%" + name + "%";
+        List<User> users = userRepository.searchUserByName(query);
+        List<UserResponse> userResponses = new ArrayList<>();
+        for (User user : users) {
+            UserResponse response = new UserResponse();
+            response.setId(user.getId());
+            response.setName(user.getName());
+            response.setEmail(user.getEmail());
+            response.setAvatar(user.getAvatar());
+
+            userResponses.add(response);
+        }
+
+        return userResponses;
     }
 }

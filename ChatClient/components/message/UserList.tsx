@@ -21,7 +21,7 @@ const UserList = (props: Props) => {
       renderItem={({ item }) => (
         <Link  href={{ pathname: "/message/[id]", params: { id: item.id,  username: item.name, image: item.avatar }}}>
         <View style={styles.userContainer}>
-          <Image source={{ uri: item.avatar || require('@/assets/images/avatar_default.jpeg') }} style={styles.userImage} />
+          {/* <Image source={{ uri: item.avatar || require('@/assets/images/avatar_default.jpeg') }} style={styles.userImage} /> */}
           <Text style={styles.userName}>{item.name}</Text>
         </View>
         </Link>
