@@ -145,8 +145,6 @@ public class MessageServiceImpl implements MessageService {
 
         messageRepository.save(message);
 
-        
-
         List<FileResponse> fileResponses = new ArrayList<>();
         for (MultipartFile file : files) {
             try {
@@ -180,7 +178,8 @@ public class MessageServiceImpl implements MessageService {
                 savedFile.setFileSize(file.getSize());
 
                 fileRepository.save(savedFile);
-
+//                savedFile.setFileType(File.FileType.AUDIO);
+//                filePath = storeFile(file, UPLOAD_DIR + "/files");
                 FileResponse fileResponse = new FileResponse().fromFile(savedFile);
                 fileResponses.add(fileResponse);
             } catch (IOException e) {

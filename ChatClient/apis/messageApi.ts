@@ -1,6 +1,6 @@
 import { Alert } from "react-native";
 import axiosClient from "./axiosClient";
-import {getInfoAsync} from "expo-file-system";
+import { getInfoAsync } from "expo-file-system";
 export interface Message {
   id: number;
   type: string;
@@ -115,7 +115,7 @@ class MessageAPI {
     isGroup: boolean
   ) => {
     const formData = new FormData();
-  
+
     // Chỉ gửi một ảnh duy nhất
     files.forEach((file) => {
       formData.append("files", {
@@ -124,14 +124,14 @@ class MessageAPI {
         name: file.fileName || file.name,
       } as any);
     });
-  
+
     const config = {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "multipart/form-data", // Đảm bảo Content-Type là đúng
       },
     };
-  
+
     let url = "";
     if (isGroup) {
       if (!chatId) {
@@ -172,7 +172,6 @@ class MessageAPI {
         name: `audio_${Date.now()}.mp3`, // Lấy tên file từ đường dẫn
         type: "audio/x-m4a", // MIME type
       } as any);
-     
     } catch (error) {
       console.error("Lỗi khi chuẩn bị file audio ở message api:", error);
       return;
@@ -202,7 +201,7 @@ class MessageAPI {
 
     try {
       console.log(`form data nhan o message APi ${JSON.stringify(formData)}`);
-      
+
       const response = await axiosClient.post(url, formData, config);
       return response.data;
     } catch (error) {

@@ -9,7 +9,7 @@
 //   const [muted, setMuted] = useState(false);
 //   const [videoOn, setVideoOn] = useState(true);
 //   const [facing, setFacing] = useState<CameraType>('back');
-//   const router = useRouter();  
+//   const router = useRouter();
 //   // Yêu cầu quyền truy cập camera
 //   useEffect(() => {
 //     (async () => {
@@ -185,44 +185,32 @@
 
 // export default VideoCallScreen;
 
-
-import React, { useState } from 'react';
-import {
-  Button,
-  SafeAreaView,
-  View,
-} from 'react-native';
-import { mediaDevices, RTCView, MediaStream } from 'react-native-webrtc';
+import React, { useState } from "react";
+import { Button, SafeAreaView, View } from "react-native";
+// import { mediaDevices, RTCView } from "react-native-webrtc";
 
 const App = () => {
   const [stream, setStream] = useState<MediaStream | null>(null);
 
-  const start = async (): Promise<void> => {
-    if (!stream) {
-      try {
-        const s: MediaStream = await mediaDevices.getUserMedia({ video: true });
-        setStream(s);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  };
+  // const start = async (): Promise<void> => {
+  //   if (!stream) {
+  //     try {
+  //       const s: MediaStream = await mediaDevices.getUserMedia({ video: true });
+  //       setStream(s);
+  //     } catch (e) {
+  //       console.error(e);
+  //     }
+  //   }
+  // };
 
   return (
-    <SafeAreaView>
-      {stream && (
-        <RTCView
-          streamURL={stream.toURL()}
-          style={{ flex: 1 }}
-        />
-      )}
-      <View>
-        <Button
-          title="Start"
-          onPress={start}
-        />
-      </View>
-    </SafeAreaView>
+    // <SafeAreaView>
+    //   {stream && <RTCView streamURL={stream.toURL()} style={{ flex: 1 }} />}
+    //   <View>
+    //     <Button title="Start" onPress={start} />
+    //   </View>
+    // </SafeAreaView>
+    <View></View>
   );
 };
 

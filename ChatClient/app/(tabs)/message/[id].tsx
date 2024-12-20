@@ -1,5 +1,13 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { View, Text, Image, FlatList, Alert } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ContainerComponent,
@@ -9,6 +17,7 @@ import {
   SectionComponent,
   SpaceComponent,
   TextComponent,
+  VoiceChatComponent,
 } from "@/components";
 import { Ionicons } from "@expo/vector-icons";
 import { appColors } from "@/constants/appColor";
@@ -24,11 +33,20 @@ import {
   fetchSingleMessages,
   selectMessages,
   uploadFile,
+  uploadFileAudio,
 } from "@/state/reducers/messageReducer";
 import { authSelector, AuthState } from "@/state/reducers/authReducer";
 import { AppDispatch } from "@/state/store";
 import webSocketService from "@/services/WebSocketService";
 import { appInfo } from "@/constants/appInfors";
+import { Message } from "@/data";
+import { Audio } from "expo-av";
+// import FileSystem from 'expo-file-system';
+
+interface Recording {
+  sound: Audio.Sound;
+  duration: string;
+}
 
 export default function Page() {
   const { id, username, image, isGroup } = useLocalSearchParams();
@@ -44,6 +62,18 @@ export default function Page() {
   const route = useRouter();
 
   const flatListRef = useRef<FlatList>(null);
+
+  const playAudio = async (audioUri: string) => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: audioUri },
+        { shouldPlay: true }
+      );
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error playing audio", error);
+    }
+  };
 
   useEffect(() => {
     if (auth && auth.accessToken) {
@@ -78,7 +108,7 @@ export default function Page() {
       setMessageContent("");
       flatListRef.current?.scrollToEnd({ animated: true });
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Lỗi khi gửi tin nhắn:", error);
     }
   };
 
@@ -91,40 +121,12 @@ export default function Page() {
       allowsMultipleSelection: true,
     });
 
-    if (!result.canceled && result.assets.length > 0) {
-      try {
-        const response = await dispatch(
-          uploadFile({
-            recipientId,
-            chatId: isGroup ? recipientId : null,
-            accessToken: auth.accessToken,
-            files: result.assets,
-            isGroup: isGroupBoolean,
-            fromMobile: false,
-          })
-        );
-
-        if (response.payload) {
-          webSocketService.sendFileMessage(response.payload);
-        }
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
-    }
-  };
-
-  const handleFilePick = async () => {
-    try {
-      let result = await DocumentPicker.getDocumentAsync({
-        type: "*/*",
-        multiple: true,
-      });
-
-      if (!result.canceled && result.assets.length > 0) {
+    if (!result.canceled) {
+      if (result.assets.length > 0) {
         try {
           const response = await dispatch(
             uploadFile({
-              recipientId,
+              recipientId: recipientId,
               chatId: isGroup ? recipientId : null,
               accessToken: auth.accessToken,
               files: result.assets,
@@ -136,95 +138,137 @@ export default function Page() {
           if (response.payload) {
             webSocketService.sendFileMessage(response.payload);
           }
+
           flatListRef.current?.scrollToEnd({ animated: true });
         } catch (error) {
-          Alert.alert("Error", "Unable to send file");
+          console.error("Lỗi khi chọn file:", error);
         }
       }
-    } catch (error) {
-      console.error("Error picking file:", error);
     }
   };
 
-  useLayoutEffect(() => {
-    if (flatListRef.current && messages.length) {
-      setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 1000);
+  const handleFilePick = async () => {
+    try {
+      let result = await DocumentPicker.getDocumentAsync({
+        type: "*/*",
+        multiple: true,
+      });
+
+      if (!result.canceled) {
+        if (result.assets && result.assets.length > 0) {
+          try {
+            const response = await dispatch(
+              uploadFile({
+                recipientId: recipientId,
+                chatId: isGroup ? recipientId : null,
+                accessToken: auth.accessToken,
+                files: result.assets,
+                isGroup: isGroupBoolean,
+                fromMobile: false,
+              })
+            );
+
+            if (response.payload) {
+              webSocketService.sendFileMessage(response.payload);
+            }
+
+            flatListRef.current?.scrollToEnd({ animated: true });
+          } catch (error) {
+            Alert.alert("Lỗi", "Không thể gửi file");
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Lỗi khi chọn file:", error);
     }
-  }, [messages]); // Triggered when messages change
+  };
+
+  useEffect(() => {
+    flatListRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
 
   return (
-    <ContainerComponent>
-      <SectionComponent styles={[globalStyles.shadow, { width: "100%" }]}>
-        <RowComponent justify="space-between">
-          <IconButtonComponent
-            icon={<Ionicons name="arrow-back" size={22} />}
-            onPress={() => route.back()}
-          />
-          <RowComponent>
-            {image ? (
-              <Image
-                source={{ uri: image+"" }}
-                style={{ width: 50, height: 50, borderRadius: 25 }}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined} // Thêm padding cho iOS
+      keyboardVerticalOffset={90} // Điều chỉnh offset (phụ thuộc vào header)
+    >
+      <ContainerComponent>
+        <SectionComponent styles={[globalStyles.shadow, { width: "100%" }]}>
+          <RowComponent justify="space-between">
+            <IconButtonComponent
+              icon={<Ionicons name="arrow-back" size={22} />}
+              onPress={() => route.back()}
+            />
+            <RowComponent>
+              {image ? (
+                <Image
+                  source={{ uri: image + "" }}
+                  style={{ width: 50, height: 50, borderRadius: 25 }}
+                />
+              ) : (
+                <Image
+                  source={require("@/assets/images/avatar_default.jpeg")}
+                  style={{ width: 50, height: 50, borderRadius: 25 }}
+                />
+              )}
+
+              <SectionComponent>
+                <TextComponent
+                  text={username.toString()}
+                  font={fontFamilies.acmeRegular.fontFamily}
+                  size={24}
+                />
+                <TextComponent
+                  text={"active now"}
+                  color={appColors.gray}
+                  title
+                />
+              </SectionComponent>
+            </RowComponent>
+            <SpaceComponent width={4} />
+            <RowComponent>
+              <IconButtonComponent
+                icon={<Ionicons name="call-outline" size={22} />}
               />
-            ) : (
-              <Image
-                source={require("@/assets/images/avatar_default.jpeg")}
-                style={{ width: 50, height: 50, borderRadius: 25 }}
+              <IconButtonComponent
+                icon={<Ionicons name="videocam-outline" size={24} />}
+                onPress={() => route.push("/call/video")}
+              />
+            </RowComponent>
+          </RowComponent>
+        </SectionComponent>
+        <SectionComponent
+          styles={{
+            width: "100%",
+            height: appInfo.sizes.HEIGHT * 0.74,
+          }}
+        >
+          <FlatList
+            ref={flatListRef}
+            style={{ paddingHorizontal: 16 }}
+            data={messages}
+            renderItem={({ item }) => (
+              <MessageItemComponent
+                message={item}
+                currentUserId={auth.userId}
               />
             )}
+            keyExtractor={(item) => item.id.toString()}
+            extraData={messages}
+          />
+        </SectionComponent>
 
-            <SectionComponent>
-              <TextComponent
-                text={username.toString()}
-                font={fontFamilies.acmeRegular.fontFamily}
-                size={24}
-              />
-              <TextComponent text="Active now" color={appColors.gray} title />
-            </SectionComponent>
-          </RowComponent>
-          <SpaceComponent width={4} />
-          <RowComponent>
-            <IconButtonComponent
-              icon={<Ionicons name="call-outline" size={22} />}
-            />
-            <IconButtonComponent
-              icon={<Ionicons name="videocam-outline" size={24} />}
-            />
-          </RowComponent>
-        </RowComponent>
-      </SectionComponent>
-
-      <SectionComponent
-        styles={{
-          width: "100%",
-          height: appInfo.sizes.HEIGHT * 0.74,
-        }}
-      >
-        <FlatList
-          ref={flatListRef}
-          style={{
-            paddingHorizontal: 16,
-          }}
-          initialScrollIndex={messages.length + 1}
-          data={messages}
-          renderItem={({ item }) => (
-            <MessageItemComponent message={item} currentUserId={auth.userId} />
-          )}
-          keyExtractor={(item) => item.id.toString()}
-          extraData={messages}
-          // onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        {/* Thành phần nhập tin nhắn */}
+        <SendAndInputComponent
+          messageContent={messageContent}
+          setMessageContent={setMessageContent}
+          sendTextMessage={sendTextMessage}
+          onSendImage={handleImagePick}
+          onSendFile={handleFilePick}
         />
-      </SectionComponent>
-
-      <SendAndInputComponent
-        messageContent={messageContent}
-        setMessageContent={setMessageContent}
-        sendTextMessage={sendTextMessage}
-        onSendImage={handleImagePick}
-        onSendFile={handleFilePick}
-      />
-    </ContainerComponent>
+        {/* <VoiceChatComponent /> */}
+      </ContainerComponent>
+    </KeyboardAvoidingView>
   );
 }
