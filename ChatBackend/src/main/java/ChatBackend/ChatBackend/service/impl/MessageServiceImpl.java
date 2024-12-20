@@ -162,7 +162,7 @@ public class MessageServiceImpl implements MessageService {
                     } else if (contentType.startsWith("video/")) {
                         savedFile.setFileType(File.FileType.VIDEO);
                         filePath = storeFile(file, UPLOAD_DIR + "/videos");
-                    } else if (contentType.startsWith("audio")) {
+                    } else if (contentType.startsWith("audio/")) {
                         savedFile.setFileType(File.FileType.AUDIO);
                         filePath = storeFile(file, UPLOAD_DIR + "/files");
                     } else {
@@ -357,6 +357,9 @@ public class MessageServiceImpl implements MessageService {
                     } else if (contentType.startsWith("video/")) {
                         savedFile.setFileType(File.FileType.VIDEO);
                         filePath = storeFile(file, UPLOAD_DIR + "/videos");
+                    } else if (contentType.startsWith("audio/")) {
+                        savedFile.setFileType(File.FileType.AUDIO);
+                        filePath = storeFile(file, UPLOAD_DIR + "/files");
                     } else {
                         savedFile.setFileType(File.FileType.DOCUMENT);
                         filePath = storeFile(file, UPLOAD_DIR + "/files");

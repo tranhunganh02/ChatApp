@@ -42,6 +42,7 @@ public class Message {
     public enum MessageType {
         TEXT,
         FILE,
-        CALL
+        CALL,
+        AUDIO
     }
 }
