@@ -70,7 +70,7 @@ export const uploadFile = createAsyncThunk(
 
     try {
 
-      if(fromMobile) {
+      if (fromMobile) {
         const response = await messageAPI.uploadFileMobile(
           recipientId,
           chatId,
@@ -79,7 +79,7 @@ export const uploadFile = createAsyncThunk(
           isGroup
         );
         return response;
-      }else {
+      } else {
         const response = await messageAPI.uploadFile(
           recipientId,
           chatId,
@@ -96,6 +96,41 @@ export const uploadFile = createAsyncThunk(
     }
   }
 );
+
+export const uploadFileAudio = createAsyncThunk(
+  "messages/uploadFile",
+  async (
+    params: {
+      recipientId: number | null;
+      chatId: number | null;
+      accessToken: string;
+      files: string;
+      isGroup: boolean;
+    },
+    thunkAPI
+  ) => {
+    const { recipientId, chatId, accessToken, files, isGroup } = params;
+
+    try {
+
+
+      const response = await messageAPI.uploadFileAudio(
+        recipientId,
+        chatId,
+        accessToken,
+        files,
+        isGroup
+      );
+      return response;
+
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || `Lỗi khi tải file:  ${JSON.stringify(error.message)}`
+      );
+    }
+  }
+);
+
 
 
 const messageSlice = createSlice({

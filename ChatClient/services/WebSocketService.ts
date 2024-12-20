@@ -5,6 +5,7 @@ import { Message } from "@/apis/messageApi";
 import store from "@/state/store";
 import { addMessage } from "@/state/reducers/messageReducer";
 import { addChat, fetchChats } from "@/state/reducers/chatReducer";
+import { appInfo } from "@/constants/appInfors";
 
 class WebSocketService {
   private stompClient: Client | null = null;
@@ -18,7 +19,7 @@ class WebSocketService {
       return;
     }
 
-    const socket = new SockJS("http://192.168.1.15:8080/ws");
+    const socket = new SockJS(`http://192.168.88.163:8080/ws`);
     this.stompClient = new Client({
       webSocketFactory: () => socket as any,
       connectHeaders: {
@@ -132,6 +133,37 @@ class WebSocketService {
       console.error("Cannot subscribe: WebSocket connection is not active");
     }
   }
+
+  subscribeToCallNotifications(onCallReceived: (signal: any) => void) {
+    if (this.stompClient && this.stompClient.active) {
+        this.stompClient.subscribe("/user/queue/call", (message) => {
+            const callData = JSON.parse(message.body);
+            console.log("Received call signal:", callData);
+            onCallReceived(callData); // Gửi dữ liệu tín hiệu đến callback
+        });
+    } else {
+        console.error("WebSocket connection is not active.");
+    }
+}
+
+sendCallNotification(recipientId: number, signal: { type: string; sdp?: any; candidate?: any }) {
+  if (this.stompClient && this.stompClient.active) {
+      this.stompClient.publish({
+          destination: "/app/call",
+          body: JSON.stringify({
+              recipient_id: recipientId,
+              type: signal.type, // "offer", "answer", "candidate"
+              sdp: signal.sdp || null,
+              candidate: signal.candidate || null,
+          }),
+      });
+      console.log(`Sent ${signal.type} to user ${recipientId}`);
+  } else {
+      Alert.alert("Error", "WebSocket is not connected");
+  }
+}
+
+
 }
 
 const webSocketService = new WebSocketService();

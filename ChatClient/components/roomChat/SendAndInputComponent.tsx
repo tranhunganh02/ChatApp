@@ -5,7 +5,6 @@ import IconButtonComponent from "../IconButtonComponent";
 import {
   Ionicons,
   MaterialCommunityIcons,
-  MaterialIcons,
 } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import RowComponent from "../RowComponent";
@@ -39,14 +38,14 @@ const SendAndInputComponent = ({
         height: height * 0.08,
         borderTopColor: "#EDEDED",
         position: "absolute",
-        bottom: 0,
+        bottom: -10,
         justifyContent: "center",
         paddingHorizontal:
           typeDevice === "mobile medium"
-            ? 16
+            ? 4
             : typeDevice === "tablet"
-            ? 22
-            : 30,
+            ? 4
+            : 4,
       }}
     >
       <RowComponent justify="space-between">
@@ -56,7 +55,7 @@ const SendAndInputComponent = ({
         />
         <InputComponent
           customStyle={{
-            width: typeDevice === "mobile medium" ? "65%" : "75%",
+            width: typeDevice === "mobile large" ? "50%" : "60%",
             height: appInfo.sizes.HEIGHT * 0.0492,
             borderWidth: 0.8,
             borderRadius: 12,
@@ -73,11 +72,12 @@ const SendAndInputComponent = ({
         {/* <SpaceComponent width={20}/> */}
         <RowComponent>
           <IconButtonComponent
-            icon={<Ionicons name="image" size={22} onPress={onSendImage} />}
+            icon={<Ionicons name="image" size={24} onPress={onSendImage} />}
           />
-          <SpaceComponent width={6} />
+
+        <SpaceComponent width={6} />
           <IconButtonComponent
-            icon={<Ionicons name="send-sharp" size={22} />}
+            icon={<Ionicons name="send-sharp" size={24} />}
             onPress={sendTextMessage}
           />
         </RowComponent>

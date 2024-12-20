@@ -14,6 +14,7 @@ import {
 } from "react-native";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
+import webSocketService from "@/services/WebSocketService";
 const IncomingCallScreen = () => {
 
     const router = useRouter();
@@ -68,6 +69,25 @@ const IncomingCallScreen = () => {
         },
       })
     ).current;
+
+    useEffect(() => {
+      const handleCallNotification = (callData: any) => {
+        Alert.alert(
+          "Cuộc gọi đến",
+          `Bạn có cuộc gọi từ ${callData.caller_name}`,
+          [
+            { text: "Từ chối", onPress: () => router.back() },
+            { text: "Chấp nhận", onPress: () => router.push("/call/video") },
+          ]
+        );
+      };
+  
+      webSocketService.subscribeToCallNotifications(handleCallNotification);
+  
+      return () => {
+        //webSocketService.disconnect(); // Ngắt kết nối WebSocket khi thoát màn hình
+      };
+    }, []);
   return (
     <View style={styles.container}>
       <Image

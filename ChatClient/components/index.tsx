@@ -7,6 +7,7 @@ import InputComponent from "./InputComponent";
 import ChatList from "./message/ChatListComponent";
 import UserList from "./message/UserList";
 import MessageItemComponent from "./roomChat/MessageItemComponent";
+import VoiceChatComponent from "./roomChat/VoiceChatComponent";
 import RowComponent from "./RowComponent";
 import SectionComponent from "./SectionComponent";
 import SpaceComponent from "./SpaceComponent";
@@ -25,5 +26,6 @@ export {
     UserList,
     ChatList,
     MessageItemComponent,
-    CallListener
+    CallListener,
+    VoiceChatComponent
 }

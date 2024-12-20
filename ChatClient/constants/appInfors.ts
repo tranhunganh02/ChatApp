@@ -5,9 +5,9 @@ export const appInfo = {
     WIDTH: Dimensions.get("window").width,
     HEIGHT: Dimensions.get("window").height,
   },
-  //  BASE_URL: 'http://192.168.88.163:8080/api/v1/',
+   BASE_URL: 'http://192.168.88.163:8080/api/v1/',
   // BASE_URL: 'http://192.168.88.120:8001/api/v1/',
-  BASE_URL: "http://localhost:8080/api/v1/",
+  //BASE_URL: "http://localhost:8080/api/v1/",
 };
 
 export const getDeviceType = () => {

@@ -1,7 +1,9 @@
 // app/home/_layout.tsx
-import { Tabs, usePathname } from 'expo-router';
+import { Tabs, usePathname, useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons, AntDesign } from '@expo/vector-icons'; // Import thư viện biểu tượng
 import { appColors } from '@/constants/appColor';
+import { useEffect } from 'react';
+import { useRoute } from '@react-navigation/native';
 
 const renderTabIcon = (iconName: string, focused: boolean, size: number) => {
   const color = focused ? appColors.activeIcon : appColors.gray;
@@ -18,27 +20,46 @@ const renderTabIcon = (iconName: string, focused: boolean, size: number) => {
 
 export default function HomeLayout() {
   const pathname = usePathname();
-  console.log("path name now", pathname);
-
+  
+  useEffect(() => {
+    return () => {}
+}, [pathname.toString()])
   return (
     <Tabs
-      screenOptions={{
-        tabBarStyle: {
-          display: pathname.startsWith('/message/') || pathname.startsWith('/setting/user') 
-          // && !pathname.includes('/index') 
-          ? 'none' : 'flex',
-        },
+      // screenOptions={{
+      //   tabBarStyle: {
+      //   //  display: pathname.startsWith('/message/') || pathname.startsWith('/setting/user') 
+      //   //   // // && !pathname.includes('/index') 
+      //   //    ? 'none' : 'flex',
+      //   },
+      //   headerShown: false,
+      //   tabBarActiveTintColor: appColors.activeIcon, // Màu sắc cho nhãn khi active
+      //   tabBarInactiveTintColor: appColors.gray, // Màu sắc cho nhãn khi inactive
+      // }}
+      
+      
+      screenOptions={({ route }) => ({
+
         headerShown: false,
         tabBarActiveTintColor: appColors.activeIcon, // Màu sắc cho nhãn khi active
         tabBarInactiveTintColor: appColors.gray, // Màu sắc cho nhãn khi inactive
-      }}
+      })}
     >
       <Tabs.Screen 
+        
         name="message" 
-        options={{
+        
+        options={({ route }) =>({
+          tabBarStyle:{
+            display: pathname.length > 8 ?'none': 'flex',
+            
+            
+          },
+          
           tabBarLabel: 'Messages', // Nhãn cho tab
           tabBarIcon: ({ size, focused }) => renderTabIcon('chatbubble-ellipses-outline', focused, size),
-        }} 
+        })} 
+      
       />
       <Tabs.Screen 
         name="search"  

@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -17,6 +19,9 @@ import java.util.List;
 public class MessageController {
     @Autowired
     MessageService messageService;
+
+    private static final Logger logger = LoggerFactory.getLogger(MessageController.class);
+
 
     @GetMapping("/users/{recipientId}")
     public ResponseEntity<List<MessageResponse>> getSingleChatMessages(@PathVariable("recipientId") Integer recipientId, @RequestHeader("Authorization") String token) {
@@ -31,6 +36,9 @@ public class MessageController {
             @RequestHeader("Authorization") String token,
             @RequestParam("files") List<MultipartFile> files
     ) {
+        logger.info("Received request to send files to user with recipientId: {}", recipientId);
+        logger.info("Number of files received: {}", files.size());
+    
         MessageResponse message = messageService.sendSingleFileMessage(files, recipientId, token);
 
         return ResponseEntity.ok(message);

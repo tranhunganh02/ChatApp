@@ -1,6 +1,8 @@
 package ChatBackend.ChatBackend.controller;
 
 import ChatBackend.ChatBackend.exception.DataNotFoundException;
+import ChatBackend.ChatBackend.service.impl.MessageServiceImpl;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -10,7 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -18,9 +21,11 @@ import java.nio.file.Paths;
 @RequestMapping("/api/v1")
 public class Controller {
     private final String uploadDir = "uploads";
+      private static final Logger logger = LoggerFactory.getLogger(MessageServiceImpl.class);
 
     @GetMapping("/images/{filename}")
     public ResponseEntity<Resource> getImages(@PathVariable String filename) throws Exception {
+        logger.info("cos nguoi da lay amnh");
         Path filePath = Paths.get(uploadDir + "/images").resolve(filename);
         Resource resource = new UrlResource(filePath.toUri());
 
@@ -36,10 +41,12 @@ public class Controller {
 
     @GetMapping("/files/{filename}")
     public ResponseEntity<Resource> getFiles(@PathVariable String filename) throws Exception {
+        logger.info("cos nguoi da lay");
         Path filePath = Paths.get(uploadDir + "/files").resolve(filename);
         Resource resource = new UrlResource(filePath.toUri());
 
         if (resource.exists() || resource.isReadable()) {
+            logger.info("lay xog");
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")

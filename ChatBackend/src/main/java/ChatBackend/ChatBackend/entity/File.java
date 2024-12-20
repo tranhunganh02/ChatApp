@@ -37,6 +37,7 @@ public class File {
     public enum FileType {
         IMAGE,
         VIDEO,
-        DOCUMENT
+        DOCUMENT,
+        AUDIO
     }
 }

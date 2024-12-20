@@ -10,6 +10,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { Provider } from "react-redux";
 import store from '@/state/store';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
+import { CallListener } from '@/components';
 
 function RootLayout() {
   return <Stack
@@ -19,6 +20,7 @@ function RootLayout() {
       // },
       // headerTintColor: 'white''
       headerBackTitleVisible: true,
+      headerShown: false , 
   }}
  >
       <Stack.Screen name="index" options={{
@@ -37,11 +39,11 @@ function RootLayout() {
          headerShown: false , 
       }} />
        <Stack.Screen name="(tabs)" options={{
-        headerShown: false,
-        title: 'header ios'
+       /// headerShown: false,
+      
       }} />
       {/* Trang không nằm trong bottom tab */}
-      {/* <Stack.Screen
+      <Stack.Screen
         name="call/incoming"
         options={{
           headerShown: false , 
@@ -56,7 +58,7 @@ function RootLayout() {
           title: 'Video Call',
           presentation: 'modal',
         }}
-      /> */}
+      />
       {/* <Stack.Screen
         name="calls/group"
         options={{
@@ -87,6 +89,7 @@ global.TextEncoder = TextEncoder;
     <ThemeProvider value={DarkTheme}>
      <Provider store={store}>
        <RootLayout />
+       <CallListener />
      </Provider>
      </ThemeProvider>
    );

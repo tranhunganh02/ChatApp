@@ -1,5 +1,5 @@
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { View, Text, Image, FlatList, Alert } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ContainerComponent,
@@ -29,7 +29,6 @@ import { authSelector, AuthState } from "@/state/reducers/authReducer";
 import { AppDispatch } from "@/state/store";
 import webSocketService from "@/services/WebSocketService";
 import { appInfo } from "@/constants/appInfors";
-import { Message } from "@/data";
 
 export default function Page() {
   const { id, username, image, isGroup } = useLocalSearchParams();
@@ -45,23 +44,6 @@ export default function Page() {
   const route = useRouter();
 
   const flatListRef = useRef<FlatList>(null);
-
-  useEffect(() => {
-    if (auth && auth.accessToken) {
-      webSocketService
-        .connect(auth.accessToken)
-        .then(() => {
-          console.log("WebSocket connected successfully");
-        })
-        .catch((error) => {
-          console.error("Failed to connect WebSocket:", error);
-        });
-    }
-
-    return () => {
-      webSocketService.disconnect();
-    };
-  }, [auth]);
 
   useEffect(() => {
     if (auth && auth.accessToken) {
@@ -96,7 +78,7 @@ export default function Page() {
       setMessageContent("");
       flatListRef.current?.scrollToEnd({ animated: true });
     } catch (error) {
-      console.error("Lỗi khi gửi tin nhắn:", error);
+      console.error("Error sending message:", error);
     }
   };
 
@@ -109,28 +91,24 @@ export default function Page() {
       allowsMultipleSelection: true,
     });
 
-    if (!result.canceled) {
-      if (result.assets.length > 0) {
-        try {
-          const response = await dispatch(
-            uploadFile({
-              recipientId: recipientId,
-              chatId: isGroup ? recipientId : null,
-              accessToken: auth.accessToken,
-              files: result.assets,
-              isGroup: isGroupBoolean,
-              fromMobile: false,
-            })
-          );
+    if (!result.canceled && result.assets.length > 0) {
+      try {
+        const response = await dispatch(
+          uploadFile({
+            recipientId,
+            chatId: isGroup ? recipientId : null,
+            accessToken: auth.accessToken,
+            files: result.assets,
+            isGroup: isGroupBoolean,
+            fromMobile: false,
+          })
+        );
 
-          if (response.payload) {
-            webSocketService.sendFileMessage(response.payload);
-          }
-
-          flatListRef.current?.scrollToEnd({ animated: true });
-        } catch (error) {
-          console.error("Lỗi khi chọn file:", error);
+        if (response.payload) {
+          webSocketService.sendFileMessage(response.payload);
         }
+      } catch (error) {
+        console.error("Error uploading image:", error);
       }
     }
   };
@@ -142,38 +120,39 @@ export default function Page() {
         multiple: true,
       });
 
-      if (!result.canceled) {
-        if (result.assets && result.assets.length > 0) {
-          try {
-            const response = await dispatch(
-              uploadFile({
-                recipientId: recipientId,
-                chatId: isGroup ? recipientId : null,
-                accessToken: auth.accessToken,
-                files: result.assets,
-                isGroup: isGroupBoolean,
-                fromMobile: false,
-              })
-            );
+      if (!result.canceled && result.assets.length > 0) {
+        try {
+          const response = await dispatch(
+            uploadFile({
+              recipientId,
+              chatId: isGroup ? recipientId : null,
+              accessToken: auth.accessToken,
+              files: result.assets,
+              isGroup: isGroupBoolean,
+              fromMobile: false,
+            })
+          );
 
-            if (response.payload) {
-              webSocketService.sendFileMessage(response.payload);
-            }
-
-            flatListRef.current?.scrollToEnd({ animated: true });
-          } catch (error) {
-            Alert.alert("Lỗi", "Không thể gửi file");
+          if (response.payload) {
+            webSocketService.sendFileMessage(response.payload);
           }
+          flatListRef.current?.scrollToEnd({ animated: true });
+        } catch (error) {
+          Alert.alert("Error", "Unable to send file");
         }
       }
     } catch (error) {
-      console.error("Lỗi khi chọn file:", error);
+      console.error("Error picking file:", error);
     }
   };
 
-  useEffect(() => {
-    flatListRef.current?.scrollToEnd({ animated: true });
-  }, [messages]);
+  useLayoutEffect(() => {
+    if (flatListRef.current && messages.length) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 1000);
+    }
+  }, [messages]); // Triggered when messages change
 
   return (
     <ContainerComponent>
@@ -186,7 +165,7 @@ export default function Page() {
           <RowComponent>
             {image ? (
               <Image
-                source={{ uri: image + "" }}
+                source={{ uri: image+"" }}
                 style={{ width: 50, height: 50, borderRadius: 25 }}
               />
             ) : (
@@ -202,7 +181,7 @@ export default function Page() {
                 font={fontFamilies.acmeRegular.fontFamily}
                 size={24}
               />
-              <TextComponent text={"active now"} color={appColors.gray} title />
+              <TextComponent text="Active now" color={appColors.gray} title />
             </SectionComponent>
           </RowComponent>
           <SpaceComponent width={4} />
@@ -228,12 +207,14 @@ export default function Page() {
           style={{
             paddingHorizontal: 16,
           }}
+          initialScrollIndex={messages.length + 1}
           data={messages}
           renderItem={({ item }) => (
             <MessageItemComponent message={item} currentUserId={auth.userId} />
           )}
           keyExtractor={(item) => item.id.toString()}
           extraData={messages}
+          // onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
         />
       </SectionComponent>
 

@@ -1,8 +1,6 @@
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
 import axiosClient from "./axiosClient";
-import mime from "mime";
-import { appInfo } from "@/constants/appInfors";
-
+import {getInfoAsync} from "expo-file-system";
 export interface Message {
   id: number;
   type: string;
@@ -148,7 +146,7 @@ class MessageAPI {
       }
       url = `/messages/users/files/${recipientId}`;
     }
-  
+    console.log(`form data nhan o message APi ${JSON.stringify(formData)}`);
     try {
       const response = await axiosClient.post(url, formData, config);
       return response.data;
@@ -158,7 +156,61 @@ class MessageAPI {
       return;
     }
   };
-  
+  uploadFileAudio = async (
+    recipientId: number | null,
+    chatId: number | null,
+    token: string,
+    files: string, // Đường dẫn đến file audio trên thiết bị
+    isGroup: boolean
+  ) => {
+    const formData = new FormData();
+
+    try {
+      const fileInfo = await fetch(files);
+      formData.append("files", {
+        uri: fileInfo.url, // Đường dẫn file
+        name: `audio_${Date.now()}.mp3`, // Lấy tên file từ đường dẫn
+        type: "audio/x-m4a", // MIME type
+      } as any);
+     
+    } catch (error) {
+      console.error("Lỗi khi chuẩn bị file audio ở message api:", error);
+      return;
+    }
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    };
+
+    let url = "";
+    if (isGroup) {
+      if (!chatId) {
+        Alert.alert("Lỗi", "Chat ID không hợp lệ cho nhóm.");
+        return;
+      }
+      url = `/messages/groups/files/${chatId}`;
+    } else {
+      if (!recipientId) {
+        Alert.alert("Lỗi", "Recipient ID không hợp lệ cho người dùng.");
+        return;
+      }
+      url = `/messages/users/files/${recipientId}`;
+    }
+
+    try {
+      console.log(`form data nhan o message APi ${JSON.stringify(formData)}`);
+      
+      const response = await axiosClient.post(url, formData, config);
+      return response.data;
+    } catch (error) {
+      console.error("Lỗi khi tải file:", error);
+      Alert.alert("Lỗi", "Không thể tải lên file.");
+      return;
+    }
+  };
 }
 
 const messageAPI = new MessageAPI();

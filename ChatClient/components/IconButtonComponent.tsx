@@ -4,14 +4,18 @@ import React, { ReactNode } from 'react'
 interface Props {
     icon: ReactNode;
     onPress?: () => void;
+    onPressIn?: () => void;
+    onPressOut?: () => void;
     colorButton?: string;
     stylesButton?: StyleProp<ViewStyle>;
 }
 
 const IconButtonComponent = (props: Props) => {
-    const {icon, onPress, colorButton, stylesButton} = props
+    const {icon, onPress, colorButton, stylesButton, onPressIn, onPressOut} = props
     return (
         <TouchableOpacity
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
             onPress={onPress}
             style={[{
                 backgroundColor: colorButton?? 'transparent',

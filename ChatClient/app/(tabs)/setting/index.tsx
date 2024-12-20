@@ -12,6 +12,7 @@ import { Link, useRouter } from "expo-router";
 import { useDispatch } from "react-redux";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { removeAuth } from "@/state/reducers/authReducer";  // Cập nhật đường dẫn này nếu cần
+import { ContainerComponent } from "@/components";
 
 const UserSetting = () => {
   const dispatch = useDispatch();
@@ -55,7 +56,7 @@ const UserSetting = () => {
  
 
   return (
-    <ScrollView style={styles.container}>
+    <ContainerComponent isScroll>
       <View style={styles.topbar}></View>
       {/* Profile Section */}
       <Link href={{ pathname: "/setting/user" }}>
@@ -75,7 +76,7 @@ const UserSetting = () => {
       <View style={styles.optionContainer}>
         {item.map((i, index) => renderOption(i.icon, i.text, index, i.action))}
       </View>
-    </ScrollView>
+    </ContainerComponent>
   );
 };
 

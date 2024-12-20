@@ -1,7 +1,7 @@
 // messages.tsx
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
-import { Link } from "expo-router";
+import { Link, useRouter,Router } from "expo-router";
 import {
   CircleComponent,
   ContainerComponent,
@@ -34,19 +34,24 @@ const Messages = () => {
   const { getItem } = useAsyncStorage("auth");
   const dispatch = useDispatch<AppDispatch>();
   const auth: AuthState = useSelector(authSelector);
+  const router = useRouter();
 
-  useEffect(() => {
-    if (auth && auth.accessToken) {
-      webSocketService
-        .connect(auth.accessToken)
-        .then(() => {
-          console.log("WebSocket connected successfully");
-        })
-        .catch((error) => {
-          console.error("Failed to connect WebSocket:", error);
-        });
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (auth && auth.accessToken) {
+  //     webSocketService
+  //       .connect(auth.accessToken)
+  //       .then(() => {
+  //         console.log("WebSocket connected successfully");
+  //       })
+  //       .catch((error) => {
+  //         console.error("Failed to connect WebSocket:", error);
+  //       });
+  //   }
+  // }, []);
+
+  const navigateToChat = () => {
+    router.navigate('/(tabs)/message/')
+  }
 
   useEffect(() => {
     if (auth && auth.accessToken) {

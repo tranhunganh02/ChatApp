@@ -15,7 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -44,8 +45,11 @@ public class MessageServiceImpl implements MessageService {
 
     private final String UPLOAD_DIR = "uploads";
 
+    private static final Logger logger = LoggerFactory.getLogger(MessageServiceImpl.class);
+
     @Override
     public MessageResponse getMessageById(Integer id) {
+        
         Message message = messageRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("Tin nhắn không tồn tại!"));
         MessageResponse response = new MessageResponse();
@@ -112,6 +116,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public MessageResponse sendSingleFileMessage(List<MultipartFile> files, Integer recipientId, String token) {
+        
         String email = jwtTokenProvider.getEmail(token.substring(7));
         User sender = userRepository.findByEmail(email)
                 .orElseThrow(() -> new DataNotFoundException("Người gửi không tồn tại!"));
@@ -140,6 +145,8 @@ public class MessageServiceImpl implements MessageService {
 
         messageRepository.save(message);
 
+        
+
         List<FileResponse> fileResponses = new ArrayList<>();
         for (MultipartFile file : files) {
             try {
@@ -147,6 +154,7 @@ public class MessageServiceImpl implements MessageService {
                 String filePath;
 
                 String contentType = file.getContentType();
+                logger.info("Content type received: {}", contentType);
                 if (contentType != null) {
                     if (contentType.startsWith("image/")) {
                         savedFile.setFileType(File.FileType.IMAGE);
@@ -154,6 +162,9 @@ public class MessageServiceImpl implements MessageService {
                     } else if (contentType.startsWith("video/")) {
                         savedFile.setFileType(File.FileType.VIDEO);
                         filePath = storeFile(file, UPLOAD_DIR + "/videos");
+                    } else if (contentType.startsWith("audio")) {
+                        savedFile.setFileType(File.FileType.AUDIO);
+                        filePath = storeFile(file, UPLOAD_DIR + "/files");
                     } else {
                         savedFile.setFileType(File.FileType.DOCUMENT);
                         filePath = storeFile(file, UPLOAD_DIR + "/files");
