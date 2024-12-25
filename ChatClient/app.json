@@ -19,7 +19,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.tranhunganh.ChatClient",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "This app requires access to the microphone for audio calls."
+        "NSMicrophoneUsageDescription": "Ứng dụng cần quyền truy cập microphone để ghi âm.",
+        "NSPhotoLibraryUsageDescription": "Ứng dụng cần quyền truy cập thư viện ảnh để lưu file."
       }
     },
     "android": {
@@ -30,7 +31,9 @@
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
       "package": "com.tranhunganh.ChatClient"
     },
