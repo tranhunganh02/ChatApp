@@ -41,7 +41,7 @@ public class Controller {
 
     @GetMapping("/files/{filename}")
     public ResponseEntity<Resource> getFiles(@PathVariable String filename) throws Exception {
-        logger.info("cos nguoi da lay");
+        logger.info("cos nguoi da lay file");
         Path filePath = Paths.get(uploadDir + "/files").resolve(filename);
         Resource resource = new UrlResource(filePath.toUri());
 

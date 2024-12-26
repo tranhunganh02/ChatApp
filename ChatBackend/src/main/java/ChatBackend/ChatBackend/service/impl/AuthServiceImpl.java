@@ -90,6 +90,7 @@ public class AuthServiceImpl implements AuthService {
             user.setEmail(loginGGDTO.getEmail());
             user.setName(loginGGDTO.getGivenName() + " " + loginGGDTO.getFamilyName());
             user.setGoogle(true); // Đánh dấu người dùng là đăng nhập qua Google
+            user.setAvatar(loginGGDTO.getPhoto());
             userRepository.save(user);
         } else {
             // Nếu đã có người dùng, lấy thông tin người dùng từ cơ sở dữ liệu
@@ -102,6 +103,7 @@ public class AuthServiceImpl implements AuthService {
         JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
         jwtAuthResponse.setAccessToken(token);
         jwtAuthResponse.setUserId(user.getId());
+        jwtAuthResponse.setAvatar(user.getAvatar());
         return jwtAuthResponse;
     }
 

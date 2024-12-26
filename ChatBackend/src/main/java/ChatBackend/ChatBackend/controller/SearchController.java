@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/search")
-@CrossOrigin("http://localhost:8081")
 public class SearchController {
 
     @Autowired
