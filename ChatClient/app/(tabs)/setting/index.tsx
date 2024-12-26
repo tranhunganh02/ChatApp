@@ -9,15 +9,15 @@ import {
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { removeAuth } from "@/state/reducers/authReducer";  // Cập nhật đường dẫn này nếu cần
+import { authSelector, AuthState, removeAuth } from "@/state/reducers/authReducer";  // Cập nhật đường dẫn này nếu cần
 import { ContainerComponent } from "@/components";
 
 const UserSetting = () => {
   const dispatch = useDispatch();
   const  router  = useRouter()
-
+  const auth: AuthState = useSelector(authSelector);
   const handleLogout = async () => {
     // Xóa thông tin xác thực từ AsyncStorage
     await AsyncStorage.removeItem('auth');
@@ -62,7 +62,7 @@ const UserSetting = () => {
       <Link href={{ pathname: "/setting/user" }}>
         <View style={styles.profileContainer}>
           <Image
-            source={{ uri: "https://via.placeholder.com/100" }} // Add the actual profile image URL here
+            source={{ uri: auth.avatar?? "https://via.placeholder.com/100" }} // Add the actual profile image URL here
             style={styles.profileImage}
           />
           <View style={styles.profileInfo}>

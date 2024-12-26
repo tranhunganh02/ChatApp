@@ -1,6 +1,4 @@
 import {
-  View,
-  Text,
   Image,
   FlatList,
   Alert,
@@ -17,7 +15,6 @@ import {
   SectionComponent,
   SpaceComponent,
   TextComponent,
-  VoiceChatComponent,
 } from "@/components";
 import { Ionicons } from "@expo/vector-icons";
 import { appColors } from "@/constants/appColor";
@@ -41,6 +38,7 @@ import webSocketService from "@/services/WebSocketService";
 import { appInfo } from "@/constants/appInfors";
 import { Message } from "@/data";
 import { Audio } from "expo-av";
+import { FileType } from "@/data/chat/message";
 // import FileSystem from 'expo-file-system';
 
 interface Recording {
@@ -132,6 +130,7 @@ export default function Page() {
               files: result.assets,
               isGroup: isGroupBoolean,
               fromMobile: false,
+              fileType: FileType.IMAGE
             })
           );
 
@@ -165,6 +164,7 @@ export default function Page() {
                 files: result.assets,
                 isGroup: isGroupBoolean,
                 fromMobile: false,
+                fileType: FileType.DOCUMENT
               })
             );
 
@@ -182,7 +182,46 @@ export default function Page() {
       console.error("Lỗi khi chọn file:", error);
     }
   };
-
+  const handleVideoPick = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        allowsEditing: false,
+        quality: 1,
+      });
+  
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const video = result.assets[0];
+  
+        try {
+          const response = await dispatch(
+            uploadFile({
+              recipientId: recipientId,
+              chatId: isGroup ? recipientId : null,
+              accessToken: auth.accessToken,
+              files: [video],
+              isGroup: isGroupBoolean,
+              fromMobile: true,
+              fileType: FileType.VIDEO
+            })
+          );
+  
+          if (response.payload) {
+            webSocketService.sendFileMessage(response.payload);
+          }
+  
+          flatListRef.current?.scrollToEnd({ animated: true });
+        } catch (error) {
+          console.error("Lỗi khi gửi video:", error);
+          Alert.alert("Lỗi", "Không thể gửi video.");
+        }
+      }
+    } catch (error) {
+      console.error("Lỗi khi chọn video:", error);
+      Alert.alert("Lỗi", "Không thể chọn video.");
+    }
+  };
+  
   useEffect(() => {
     flatListRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
@@ -233,7 +272,6 @@ export default function Page() {
               />
               <IconButtonComponent
                 icon={<Ionicons name="videocam-outline" size={24} />}
-                onPress={() => route.push("/call/video")}
               />
             </RowComponent>
           </RowComponent>
@@ -265,8 +303,8 @@ export default function Page() {
           setMessageContent={setMessageContent}
           sendTextMessage={sendTextMessage}
           onSendImage={handleImagePick}
-          onSendFile={handleFilePick}
-        />
+          onSendFile={handleFilePick} 
+          onSendVideo={handleVideoPick}        />
         {/* <VoiceChatComponent /> */}
       </ContainerComponent>
     </KeyboardAvoidingView>

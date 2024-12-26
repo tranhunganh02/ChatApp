@@ -1,6 +1,7 @@
 import { Alert } from "react-native";
 import axiosClient from "./axiosClient";
 import { getInfoAsync } from "expo-file-system";
+import { FileType } from "@/data/chat/message";
 export interface Message {
   id: number;
   type: string;
@@ -112,13 +113,19 @@ class MessageAPI {
     chatId: number | null,
     token: string,
     files: any[], // Mảng chứa một file duy nhất
-    isGroup: boolean
+    isGroup: boolean,
+    typeFile: FileType
   ) => {
     const formData = new FormData();
-
+    let type;
+    // if(typeFile== FileType.IMAGE) type = "image"
+    // else if(typeFile== FileType.AUDIO) type = "audio"
+    // else if(typeFile== FileType.VIDEO) type = "video"
+    // else 
+    type = "files"
     // Chỉ gửi một ảnh duy nhất
     files.forEach((file) => {
-      formData.append("files", {
+      formData.append(type, {
         uri: file.uri,
         type: file.mimeType, // Đảm bảo type là mimeType
         name: file.fileName || file.name,

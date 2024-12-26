@@ -23,6 +23,19 @@ import { useDispatch } from "react-redux";
 import authenticationAPI from "../../apis/authApi";
 import { addAuth, AuthState } from "@/state/reducers/authReducer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  GoogleSignin,
+  statusCodes,
+  isErrorWithCode,
+  
+} from '@react-native-google-signin/google-signin';
+GoogleSignin.configure({
+  webClientId: '654572401234-buuhpdch9dduqe54slqi5qb6kafget1c.apps.googleusercontent.com', // client ID of type WEB for your server. Required to get the `idToken` on the user object, and for offline access.
+  scopes: ['https://www.googleapis.com/auth/drive.readonly'], // what API you want to access on behalf of the user, default is email and profile
+  offlineAccess: true, // if you want to access Google API on behalf of the user FROM YOUR SERVER
+  forceCodeForRefreshToken: false, // [Android] related to `serverAuthCode`, read the docs link below *.
+  iosClientId: '654572401234-pagvv4uk4ukh1t7ptc26if62replkdsj.apps.googleusercontent.com', // [iOS] if you want to specify the client ID of type iOS (otherwise, it is taken from GoogleService-Info.plist
+});
 export default function LoginScreen() {
   const router = useRouter();
 
@@ -78,6 +91,63 @@ export default function LoginScreen() {
     }
   };
 
+  const signInGG = async () => {
+    try {
+      console.log("chuan bi login");
+      
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+      console.log(response);
+      
+      const res = await authenticationAPI.HandleAuthentication(
+        "auth/login-gg",
+        undefined,
+        {
+          "email": response.user.email, 
+          "familyName": response.user.familyName, 
+          "givenName": response.user.givenName, 
+          "avatar": response.user.photo, 
+        },
+        "post"
+      );
+
+        console.log("API response:", res.data); // Log API response
+
+        if (res.data && res.data.accessToken) {
+          const dataUser: AuthState = {
+            userId: res.data.userId, // Thêm id vào đây nếu cần
+            avatar: res.data.avatar,
+            accessToken: res.data.accessToken,
+          };
+
+          console.log("Data user being dispatched:", dataUser); // Log data user
+
+          dispatch(addAuth(dataUser));
+          await AsyncStorage.setItem("auth", JSON.stringify(dataUser));
+          router.replace("/(tabs)/message");
+        } else {
+          console.error("No access token received");
+        }
+      
+    } catch (error) {
+      if (isErrorWithCode(error)) {
+        switch (error.code) {
+          case statusCodes.IN_PROGRESS:
+          console.log("error login", error.message);
+          
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            console.log("error login", error.message);
+            break;
+          default:
+          // some other error happened
+        }
+      } else {
+        console.log("error login", error);
+      }
+    }
+  };
+
   return (
     <ContainerComponent isScroll back>
       <SectionComponent>
@@ -117,7 +187,7 @@ export default function LoginScreen() {
                 source={require("@/assets/images/icons/google-icon.png")}
               />
             }
-            onPress={() => console.log("Google button pressed")}
+            onPress={() => signInGG()}
             stylesButton={styles.socialButton}
           />
           <IconButtonComponent

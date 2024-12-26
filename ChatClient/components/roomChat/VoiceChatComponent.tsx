@@ -29,7 +29,7 @@ export default function VoiceChatComponent({
         }}
         icon={
           <MaterialCommunityIcons
-            name={record ? "microphone-off" : "microphone"}
+            name={record ? "pause" : "microphone"}
             size={30}
           />
         }

@@ -14,7 +14,6 @@ import {
 } from "../state/reducers/authReducer";
 export default function OnboardingPage() {
   const router = useRouter();
-
   const { getItem, setItem } = useAsyncStorage("auth");
   const [isShowSplash, setIsShowSplash] = useState(true);
   const dispatch = useDispatch();
@@ -25,7 +24,6 @@ export default function OnboardingPage() {
     const timeout = setTimeout(() => {
       setIsShowSplash(false);
       router.replace("/(tabs)/message");
-      // router.replace("/call/incoming")
     }, 2000);
 
     return () => clearTimeout(timeout);

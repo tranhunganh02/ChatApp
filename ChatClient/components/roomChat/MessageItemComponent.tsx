@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import React from "react";
-import { Audio } from 'expo-av';
+import React, { useRef, useState } from "react";
+import { Audio, ResizeMode, Video } from 'expo-av';
 import { Image } from "expo-image";
 import { appColors } from "@/constants/appColor";
 import { appInfo } from "@/constants/appInfors";
@@ -22,29 +22,6 @@ export default function MessageItemComponent({
   currentUserId,
 }: MessageItemComponentProps) {
   const isCurrentUser = message.sender_id === currentUserId;
-  const playAudio = async (audioUrl: string) => {
-    try {
-      console.log(`chuan bi phat ${audioUrl}`);
-      // Fetch the audio file from the backend
-      const response = await fetch(audioUrl);
-      if (!response.ok) {
-        throw new Error("Failed to fetch the audio file");
-      }
-  
-      // Use the URL directly
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: audioUrl }, // Use the direct URL
-        { shouldPlay: true }
-      );
-      console.log('Playing Sound');
-      await sound.playAsync(); // Use sound here instead of soundd
-  
-    } catch (error) {
-      console.error("Error playing audio", error);
-    }
-  };
-  
-
   const renderMessageContent = () => {
     
     switch (message.type) {
@@ -72,7 +49,7 @@ export default function MessageItemComponent({
                   <View key={index}>
                     <Image
                       style={styles.imagePreview}
-                      source={{ uri: fileUrl }}
+                      source={{ uri: `${appInfo.BASE_URL}images/${fileName}` }}
                       placeholder={{ blurhash }}
                       contentFit="cover"
                       transition={1000}
@@ -80,10 +57,31 @@ export default function MessageItemComponent({
                   </View>
                 );
               } else if (file.file_type === "AUDIO") {
+                const playAudio = async (audioUrl: string) => {
+                  try {
+                    console.log(`chuan bi phat ${audioUrl}`);
+                    // Fetch the audio file from the backend
+                    const response = await fetch(audioUrl);
+                    if (!response.ok) {
+                      throw new Error("Failed to fetch the audio file");
+                    }
+                
+                    // Use the URL directly
+                    const { sound } = await Audio.Sound.createAsync(
+                      { uri: audioUrl }, // Use the direct URL
+                      { shouldPlay: true }
+                    );
+                    console.log('Playing Sound');
+                    await sound.playAsync(); // Use sound here instead of soundd
+                
+                  } catch (error) {
+                    console.error("Error playing audio", error);
+                  }
+                };              
                 return (
                     <TouchableOpacity
                     key={index}
-                      onPress={() => playAudio(fileUrl)} // Play the audio file
+                      onPress={() => playAudio(`${appInfo.BASE_URL}files/${fileName}`)} // Play the audio file
                     >
                   
                    <Ionicons name="play" size={24}/>
@@ -91,7 +89,29 @@ export default function MessageItemComponent({
                 
                     </TouchableOpacity>
                 );
-              } else {
+              } 
+              else if (file.file_type === "VIDEO") {
+                const video = useRef(null);
+                const [status, setStatus] = useState({});
+                console.log("link video", `${appInfo.BASE_URL}videos/${fileName}`);
+                
+                return (
+                  <Video
+                  key={index}
+                    ref={video}
+                    style={{width: 150,
+                      height: 180,}}
+                    source={{
+                      uri: `${appInfo.BASE_URL}videos/${fileName}`,
+                    }}
+                    useNativeControls
+                    resizeMode={ResizeMode.CONTAIN}
+                    isLooping
+                    onPlaybackStatusUpdate={status => setStatus(() => status)}
+                  />
+                );
+              }
+              else {
                 return (
                   <View key={index}>
                     <Text

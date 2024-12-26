@@ -26,9 +26,11 @@ export const fetchChats = createAsyncThunk(
       );
       return response.data;
     } catch (error: any) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch chats"
-      );
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        // Lỗi liên quan đến access token
+        return thunkAPI.rejectWithValue('Unauthorized');
+      }
+      return thunkAPI.rejectWithValue(error.message);
     }
   }
 );

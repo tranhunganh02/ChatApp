@@ -1,4 +1,4 @@
-import { View, Text, Alert } from "react-native";
+import { View, Text, Alert, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { appInfo, getDeviceType } from "@/constants/appInfors";
 import IconButtonComponent from "../IconButtonComponent";
@@ -17,6 +17,7 @@ interface SendAndInputComponentProps {
   sendTextMessage: () => void;
   onSendImage: () => void;
   onSendFile: () => void;
+  onSendVideo: () => void;
 }
 
 const SendAndInputComponent = ({
@@ -25,11 +26,18 @@ const SendAndInputComponent = ({
   sendTextMessage,
   onSendImage,
   onSendFile,
+  onSendVideo
 }: SendAndInputComponentProps) => {
   const height = appInfo.sizes.HEIGHT;
   const width = appInfo.sizes.WIDTH;
   const typeDevice = getDeviceType();
-
+  const [isOpenMenu, setIsOpenMenu] = useState(false);
+  const closeMenu = () => {
+    setIsOpenMenu(false);
+  };
+  const toggleMenu = () => {
+    setIsOpenMenu((prev) => !prev);
+  };
   return (
     <View
       style={{
@@ -49,9 +57,25 @@ const SendAndInputComponent = ({
       }}
     >
       <RowComponent justify="space-between">
+      {isOpenMenu && (
+        <View style={{ position: "absolute",
+          bottom: 50,
+          backgroundColor: "#fff",
+          borderRadius: 8,
+          padding: 10,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+          elevation: 5,}}>
+          <IconButtonComponent icon={<Ionicons size={24} name="document-attach" />} onPress={onSendFile}/>
+          <IconButtonComponent icon={<MaterialCommunityIcons size={24} name="file-video" onPress={onSendVideo} />} />
+          <IconButtonComponent icon={<MaterialCommunityIcons size={24} name="cancel" />} onPress={closeMenu} />
+        </View>
+      )}
         <IconButtonComponent
           icon={<MaterialCommunityIcons name="attachment" size={24} />}
-          onPress={onSendFile}
+          onPress={toggleMenu}
         />
         <InputComponent
           customStyle={{

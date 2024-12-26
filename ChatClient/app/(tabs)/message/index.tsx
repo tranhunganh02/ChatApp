@@ -17,10 +17,10 @@ import { appColors } from "@/constants/appColor";
 import { LinearGradient } from "expo-linear-gradient";
 import { appInfo } from "@/constants/appInfors";
 import { User, Chat, Message } from "@/data";
-import { authSelector, AuthState } from "@/state/reducers/authReducer";
+import { authSelector, AuthState, removeAuth } from "@/state/reducers/authReducer";
 import { useDispatch, useSelector } from "react-redux";
 import authenticationAPI from "@/apis/authApi";
-import { useAsyncStorage } from "@react-native-async-storage/async-storage";
+import AsyncStorage, { useAsyncStorage } from "@react-native-async-storage/async-storage";
 import { formatDate } from "@/utils/date";
 import webSocketService from "@/services/WebSocketService";
 import { fetchChats, selectChats } from "@/state/reducers/chatReducer";
@@ -48,20 +48,38 @@ const Messages = () => {
   //       });
   //   }
   // }, []);
-
-  const navigateToChat = () => {
-    router.navigate('/(tabs)/message/')
-  }
-
   useEffect(() => {
     if (auth && auth.accessToken) {
-      dispatch(fetchChats(auth.accessToken));
+      dispatch(fetchChats(auth.accessToken))
+        .unwrap()
+        .catch((error) => {
+          if (error === 'Unauthorized') {
+            handleLogout();
+          } else {
+            console.log('Error fetching chats:', error);
+          }
+        });
     }
-  }, []);
-
+  },);
+  
+  const handleLogout = async () => {
+    // Xóa thông tin xác thực từ AsyncStorage
+    await AsyncStorage.removeItem('auth');
+    // Xóa thông tin xác thực từ Redux
+    dispatch(removeAuth());
+    // Có thể điều hướng người dùng đến trang đăng nhập hoặc trang chính
+    router.replace("/onboarding"); // Nếu bạn sử dụng react-navigation hoặc expo-router
+  };
   return loading ? (
     <></>
-  ) : (
+  ) : 
+  // error ? (<>
+  // <ContainerComponent>
+  //   <TextComponent text="Ban chua co doan chat"/>
+  // </ContainerComponent>
+  // </>) 
+  // :
+  (
     <ContainerComponent isImageBackground>
       <SectionComponent
         styles={{

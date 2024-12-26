@@ -1,4 +1,5 @@
 import messageAPI, { Message } from "@/apis/messageApi";
+import { FileType } from "@/data/chat/message";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface MessageState {
@@ -63,10 +64,11 @@ export const uploadFile = createAsyncThunk(
       files: any[];
       isGroup: boolean;
       fromMobile: boolean;
+      fileType: FileType
     },
     thunkAPI
   ) => {
-    const { recipientId, chatId, accessToken, files, isGroup, fromMobile } =
+    const { recipientId, chatId, accessToken, files, isGroup, fromMobile, fileType } =
       params;
 
     try {
@@ -76,7 +78,8 @@ export const uploadFile = createAsyncThunk(
           chatId,
           accessToken,
           files,
-          isGroup
+          isGroup,
+          fileType
         );
         return response;
       } else {
@@ -85,7 +88,7 @@ export const uploadFile = createAsyncThunk(
           chatId,
           accessToken,
           files,
-          isGroup
+          isGroup,
         );
         return response;
       }

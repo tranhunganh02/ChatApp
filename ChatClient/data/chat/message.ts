@@ -11,6 +11,13 @@ export interface Message {
   chatId: number;
 }
 
+export enum FileType {
+  IMAGE,
+  VIDEO,
+  DOCUMENT,
+  AUDIO
+}
+
 export enum MessageType {
   TEXT,
   FILE,

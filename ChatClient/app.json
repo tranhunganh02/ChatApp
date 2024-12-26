@@ -19,7 +19,12 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.tranhunganh.ChatClient",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "This app requires access to the microphone for audio calls."
+        "NSMicrophoneUsageDescription": "This app requires access to the microphone for audio calls.",
+        "CFBundleURLTypes": [
+        {
+          "CFBundleURLSchemes": ["com.googleusercontent.apps.654572401234-pagvv4uk4ukh1t7ptc26if62replkdsj"]
+        }
+      ]
       }
     },
     "android": {
@@ -72,6 +77,12 @@
         "expo-av",
         {
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+        }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.654572401234-pagvv4uk4ukh1t7ptc26if62replkdsj"
         }
       ]
     ],

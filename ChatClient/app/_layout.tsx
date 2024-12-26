@@ -39,29 +39,6 @@ function RootLayout() {
       }} />
       {/* Trang không nằm trong bottom tab */}
       <Stack.Screen
-        name="call/incoming"
-        options={{
-          headerShown: false , 
-          title: 'Incoming Call',
-          presentation: 'modal', // Hiển thị dưới dạng modal
-        }}
-      />
-      <Stack.Screen
-        name="call/video"
-        options={{
-          headerShown: false , 
-          title: 'Video Call',
-          presentation: 'modal',
-        }}
-      />
-      {/* <Stack.Screen
-        name="calls/group"
-        options={{
-          title: 'Group Call',
-          presentation: 'modal',
-        }}
-      /> */}
-      <Stack.Screen
         name="[missing]"
         options={{
           title: '404',

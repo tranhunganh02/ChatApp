@@ -1,6 +1,6 @@
 import groupApi, { GroupChatRequest } from "@/apis/groupApi";
 import searchApi, { UserSearch } from "@/apis/searchApi";
-import { SectionComponent } from "@/components";
+import { ContainerComponent, SectionComponent } from "@/components";
 import { authSelector, AuthState } from "@/state/reducers/authReducer";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
@@ -132,7 +132,7 @@ export default function Search() {
 
 
   return (
-    <View style={styles.container}>
+    <ContainerComponent>
       <View style={styles.searchBar}>
         <TextInput
           style={styles.input}
@@ -199,7 +199,7 @@ export default function Search() {
           </View>
         </View>
       </Modal>
-    </View>
+    </ContainerComponent>
   );
 }
 

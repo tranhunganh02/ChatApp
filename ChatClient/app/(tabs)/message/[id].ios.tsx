@@ -1,4 +1,4 @@
-import { View, Text, Image, FlatList, Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { Image, FlatList, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -33,6 +33,7 @@ import webSocketService from "@/services/WebSocketService";
 import { appInfo } from "@/constants/appInfors";
 import { Message } from "@/data";
 import {Audio } from 'expo-av';
+import { FileType } from "@/data/chat/message";
 // import FileSystem from 'expo-file-system';
 
 interface Recording {
@@ -122,18 +123,6 @@ const sendVoiceMessage = async (fileUri: string) => {
   }
 };
 
-const playAudio = async (audioUri: string) => {
-  try {
-    const { sound } = await Audio.Sound.createAsync(
-      { uri: audioUri },
-      { shouldPlay: true }
-    );
-    await sound.playAsync();
-  } catch (error) {
-    console.error("Error playing audio", error);
-  }
-};
-
   useEffect(() => {
     if (auth && auth.accessToken) {
       isGroupBoolean === true
@@ -191,6 +180,7 @@ const playAudio = async (audioUri: string) => {
               files: result.assets,
               isGroup: isGroupBoolean,
               fromMobile: true,
+              fileType: FileType.IMAGE
             })
           );
 
@@ -224,6 +214,7 @@ const playAudio = async (audioUri: string) => {
                 files: result.assets,
                 isGroup: isGroupBoolean,
                 fromMobile: true,
+                fileType: FileType.DOCUMENT
               })
             );
 
@@ -241,6 +232,46 @@ const playAudio = async (audioUri: string) => {
       console.error("Lỗi khi chọn file:", error);
     }
   };
+  const handleVideoPick = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        allowsEditing: false,
+        quality: 1,
+      });
+  
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const video = result.assets[0];
+  
+        try {
+          const response = await dispatch(
+            uploadFile({
+              recipientId: recipientId,
+              chatId: isGroup ? recipientId : null,
+              accessToken: auth.accessToken,
+              files: [video],
+              isGroup: isGroupBoolean,
+              fromMobile: true,
+              fileType: FileType.VIDEO
+            })
+          );
+  
+          if (response.payload) {
+            webSocketService.sendFileMessage(response.payload);
+          }
+  
+          flatListRef.current?.scrollToEnd({ animated: true });
+        } catch (error) {
+          console.error("Lỗi khi gửi video:", error);
+          Alert.alert("Lỗi", "Không thể gửi video.");
+        }
+      }
+    } catch (error) {
+      console.error("Lỗi khi chọn video:", error);
+      Alert.alert("Lỗi", "Không thể chọn video.");
+    }
+  };
+  
 
   useEffect(() => {
     flatListRef.current?.scrollToEnd({ animated: true });
@@ -288,7 +319,6 @@ const playAudio = async (audioUri: string) => {
             />
             <IconButtonComponent
               icon={<Ionicons name="videocam-outline" size={24} />}
-              onPress={() => route.push("/call/video")}
             />
           </RowComponent>
         </RowComponent>
@@ -320,6 +350,7 @@ const playAudio = async (audioUri: string) => {
     />
         {/* Thành phần nhập tin nhắn */}
         <SendAndInputComponent
+          onSendVideo={handleVideoPick}
           messageContent={messageContent}
           setMessageContent={setMessageContent}
           sendTextMessage={sendTextMessage}
