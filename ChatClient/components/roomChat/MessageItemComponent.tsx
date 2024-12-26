@@ -1,14 +1,21 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import React, { useRef, useState } from "react";
-import { Audio, ResizeMode, Video } from 'expo-av';
+import { Audio, ResizeMode, Video } from "expo-av";
 import { Image } from "expo-image";
 import { appColors } from "@/constants/appColor";
 import { appInfo } from "@/constants/appInfors";
 import { Message, MessageType } from "@/data";
 import { formatDate } from "@/utils/date";
-import {
-  Ionicons,
-} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system";
+import MessagingDownloadComponent from "../message/MessagingDownloadComponent";
+
 interface MessageItemComponentProps {
   message: Message;
   currentUserId: number;
@@ -22,8 +29,72 @@ export default function MessageItemComponent({
   currentUserId,
 }: MessageItemComponentProps) {
   const isCurrentUser = message.sender_id === currentUserId;
+
+  const playAudio = async (audioUrl: string) => {
+    try {
+      console.log(`chuan bi phat ${audioUrl}`);
+      // Fetch the audio file from the backend
+      const response = await fetch(audioUrl);
+      if (!response.ok) {
+        throw new Error("Failed to fetch the audio file");
+      }
+
+      // Use the URL directly
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: audioUrl }, // Use the direct URL
+        { shouldPlay: true }
+      );
+      console.log("Playing Sound");
+      await sound.playAsync(); // Use sound here instead of soundd
+    } catch (error) {
+      console.error("Error playing audio", error);
+    }
+  };
+
+  const downloadFile = async (fileUrl: string, fileName: string) => {
+    if (Platform.OS === "web") {
+      const downloadFileForWeb = async (fileUrl: string, fileName: string) => {
+        try {
+          const response = await fetch(fileUrl);
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+          alert(`Tải file thành công: ${fileName}`);
+        } catch (error) {
+          console.error("Error downloading file for web:", error);
+          alert("Có lỗi xảy ra khi tải file trên web.");
+        }
+      };
+
+      return downloadFileForWeb(fileUrl, fileName);
+    } else {
+      try {
+        const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+        const downloadResult = await FileSystem.downloadAsync(fileUrl, fileUri);
+
+        if (downloadResult.status === 200) {
+          console.log(`File downloaded to: ${downloadResult.uri}`);
+          alert(`Tải file thành công: ${fileName}`);
+        } else {
+          console.error("Download failed:", downloadResult);
+          alert("Không thể tải file. Vui lòng thử lại.");
+        }
+      } catch (error) {
+        console.error("Error downloading file:", error);
+        alert("Có lỗi xảy ra khi tải file.");
+      }
+    }
+  };
+
   const renderMessageContent = () => {
-    
     switch (message.type) {
       case MessageType[MessageType.TEXT]:
         return (
@@ -40,9 +111,12 @@ export default function MessageItemComponent({
       case MessageType[MessageType.FILE]:
         return (
           <>
-            {message.fileResponses?.map((file: any, index: number) => {     
+            {message.fileResponses?.map((file: any, index: number) => {
               const fileName = `${file.file_url?.split("/").pop()}`;
-              const fileUrl = file.file_type === "IMAGE" ? `${appInfo.BASE_URL}images/${fileName}` : `${appInfo.BASE_URL}files/${fileName}`; // File URL for audio
+              const fileUrl =
+                file.file_type === "IMAGE"
+                  ? `${appInfo.BASE_URL}images/${fileName}`
+                  : `${appInfo.BASE_URL}files/${fileName}`; // File URL for audio
 
               if (file.file_type === "IMAGE") {
                 return (
@@ -79,7 +153,7 @@ export default function MessageItemComponent({
                   }
                 };              
                 return (
-                    <TouchableOpacity
+                  <TouchableOpacity
                     key={index}
                       onPress={() => playAudio(`${appInfo.BASE_URL}files/${fileName}`)} // Play the audio file
                     >
@@ -114,22 +188,10 @@ export default function MessageItemComponent({
               else {
                 return (
                   <View key={index}>
-                    <Text
-                      style={[
-                        styles.messageText,
-                        { color: isCurrentUser ? "#FFFFFF" : "#000000" },
-                      ]}
-                    >
-                      Tệp tin: {file.file_name}
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        console.log("Mở tệp", file.file_url);
-                        // Implement the file download or view action here
-                      }}
-                    >
-                      <Text style={{ color: "#1E90FF" }}>Tải về</Text>
-                    </TouchableOpacity>
+                    <MessagingDownloadComponent
+                      fileUrl={fileUrl}
+                      fileName={fileName}
+                    />
                   </View>
                 );
               }

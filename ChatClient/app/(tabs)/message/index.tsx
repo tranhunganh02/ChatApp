@@ -60,7 +60,7 @@ const Messages = () => {
           }
         });
     }
-  },);
+  }, [auth.accessToken]);
   
   const handleLogout = async () => {
     // Xóa thông tin xác thực từ AsyncStorage
@@ -99,7 +99,7 @@ const Messages = () => {
             <TextComponent text="Home" title color="white" size={20} />
             <Image
               source={{
-                uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLe5PABjXc17cjIMOibECLM7ppDwMmiDg6Dw&s",
+                uri: auth.avatar? auth.avatar : "https://via.placeholder.com/100",
               }}
               style={{ width: 50, height: 50, borderRadius: 25 }}
             />

@@ -62,7 +62,7 @@ const UserSetting = () => {
       <Link href={{ pathname: "/setting/user" }}>
         <View style={styles.profileContainer}>
           <Image
-            source={{ uri: auth.avatar?? "https://via.placeholder.com/100" }} // Add the actual profile image URL here
+            source={{ uri: auth.avatar? auth.avatar : "https://via.placeholder.com/100" }} // Add the actual profile image URL here
             style={styles.profileImage}
           />
           <View style={styles.profileInfo}>
